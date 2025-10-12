@@ -1,5 +1,3 @@
-#from jupyter_dash import JupyterDash
-#import dash
 from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
@@ -11,7 +9,7 @@ from pages.factor_analysis import factor_analysis_layout, factor_analysis_callba
 from pages.pair_matrix import pair_matrix_layout, pair_matrix_callbacks
 
 # Initialize the Dash app with Bootstrap theme
-app = dash.Dash(
+app = Dash(
     __name__, 
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
