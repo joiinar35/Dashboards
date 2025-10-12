@@ -1,1 +1,178 @@
+/* Custom CSS for Geochemical Dashboard */
 
+/* Header Styles */
+.header-row {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header-row h1 {
+    color: white;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    padding: 10px 0;
+}
+
+/* Navigation Tabs */
+.navigation-row {
+    margin-bottom: 30px;
+}
+
+.custom-tab {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-bottom: none;
+    border-radius: 5px 5px 0 0;
+    padding: 12px 24px;
+    color: #495057;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.custom-tab--selected {
+    background-color: #0052CC !important;
+    color: white !important;
+    border-color: #0052CC;
+    box-shadow: 0 -2px 5px rgba(0, 82, 204, 0.3);
+}
+
+.custom-tab:hover {
+    background-color: #e9ecef;
+    color: #0052CC;
+}
+
+/* Page Content */
+.page-content {
+    min-height: 600px;
+    padding: 20px 0;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    height: fit-content;
+}
+
+.sidebar h4 {
+    color: #0052CC;
+    border-bottom: 2px solid #0052CC;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+/* Graph Container Styles */
+.graph-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+}
+
+/* Button Styles */
+.btn-primary {
+    background: linear-gradient(135deg, #0052CC 0%, #0066FF 100%);
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 82, 204, 0.3);
+}
+
+/* Dropdown Styles */
+.Select-control {
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    transition: border-color 0.15s ease-in-out;
+}
+
+.Select-control:hover {
+    border-color: #0052CC;
+}
+
+/* Card Styles */
+.custom-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+}
+
+.custom-card h3 {
+    color: #0052CC;
+    margin-bottom: 15px;
+}
+
+/* Explanation Text */
+.explanation-text {
+    background-color: #e8f4fd;
+    border-left: 4px solid #0052CC;
+    padding: 15px;
+    border-radius: 0 5px 5px 0;
+    margin-bottom: 20px;
+}
+
+.explanation-text p {
+    margin-bottom: 10px;
+    color: #495057;
+}
+
+/* Loading States */
+.dash-loading {
+    text-align: center;
+    padding: 50px;
+    color: #6c757d;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sidebar {
+        margin-bottom: 20px;
+    }
+    
+    .graph-container {
+        padding: 10px;
+    }
+}
+
+/* Animation for smooth transitions */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom scrollbar for sidebar */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #0052CC;
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: #003d99;
+}
