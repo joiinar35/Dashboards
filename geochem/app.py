@@ -74,5 +74,5 @@ def render_page(tab):
     else:
         return data_viz_layout
 
-if __name__ == '__main__':
-    app.run(debug=True, mode='inline')
+#if __name__ == '__main__':
+ #   app.run(debug=True, mode='inline')
