@@ -1,6 +1,6 @@
 #from jupyter_dash import JupyterDash
-import dash
-from dash import dcc, html
+#import dash
+from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 
