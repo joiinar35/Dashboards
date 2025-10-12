@@ -8,7 +8,7 @@ from factor_analyzer import FactorAnalyzer
 from scipy.interpolate import griddata
 
 # Data loading and preprocessing
-def load_and_preprocess_data(file_path='geochem_clean.csv'):
+def load_and_preprocess_data(file_path='./geochem_clean.csv'):
     try:
         df = pd.read_csv(file_path)
         if 'x_utm' in df.columns and 'y_utm' in df.columns:
