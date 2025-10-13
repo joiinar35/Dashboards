@@ -328,5 +328,4 @@ def factor_analysis_callbacks(app):
 
 
         return scree_fig_fa, variance_fig_fa, heatmap_fig_fa, map_rows
-
         pass
