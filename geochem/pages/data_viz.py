@@ -3,7 +3,7 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.express as px
-#from utils.data_loader import df, gdf, column_title_map, numeric_cols
+from utils.data_loader import df, gdf, column_title_map, numeric_cols
 from scipy.interpolate import griddata
 import numpy as np
 
