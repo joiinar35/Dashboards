@@ -141,65 +141,65 @@ def data_viz_callbacks(app):
         if df.empty or selected_column is None:
             return go.Figure().update_layout(title=dict(text="<b>Distribution Plots: Not enough data.</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
 
-    fig = make_subplots(rows=1, cols=2, subplot_titles=(f'Violin Plot of {selected_column}', f'Box Plot of {selected_column}'))
-
-    # Add Violin Plot
-    fig.add_trace(
-        go.Violin(y=df[selected_column], name='Violin', box_visible=True, meanline_visible=True),
-        row=1, col=1
-    )
-
-    # Add Box Plot
-    fig.add_trace(
-        go.Box(y=df[selected_column], name='Boxplot'),
-        row=1, col=2
-    )
-
-    # Update layout
-    fig.update_layout(
-        title_text=f"<b>Distribution of {selected_column}</b>",
-        showlegend=False,
-        height=400,
-        title_x=0.5, # Center the title
-        title_y=0.9 # Adjust vertical position if needed
-    )
-
-    return fig
+        fig = make_subplots(rows=1, cols=2, subplot_titles=(f'Violin Plot of {selected_column}', f'Box Plot of {selected_column}'))
+    
+        # Add Violin Plot
+        fig.add_trace(
+            go.Violin(y=df[selected_column], name='Violin', box_visible=True, meanline_visible=True),
+            row=1, col=1
+        )
+    
+        # Add Box Plot
+        fig.add_trace(
+            go.Box(y=df[selected_column], name='Boxplot'),
+            row=1, col=2
+        )
+    
+        # Update layout
+        fig.update_layout(
+            title_text=f"<b>Distribution of {selected_column}</b>",
+            showlegend=False,
+            height=400,
+            title_x=0.5, # Center the title
+            title_y=0.9 # Adjust vertical position if needed
+        )
+    
+        return fig
 # Callback to generate plots for 'ba_ppm' statistics
-@app.callback(
+    @app.callback(
     Output('ba_ppm_stats_plots', 'figure'),
     Input('controls', 'children') # Dummy input, triggers on initial load
-)
-def update_ba_ppm_stats_plots(_):
-    if df.empty or 'ba_ppm' not in df.columns:
-        return go.Figure().update_layout(title=dict(text="<b>Barium (Ba) Statistics: Not enough data.</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
-
-    # Create subplots: histogram and boxplot
-    fig = make_subplots(rows=1, cols=2, subplot_titles=('Histogram of Ba (ppm)', 'Boxplot of Ba (ppm)'))
-
-    # Add Histogram
-    fig.add_trace(
-        go.Histogram(x=df['ba_ppm'], nbinsx=30, name='Histogram'),
-        row=1, col=1
     )
+    def update_ba_ppm_stats_plots(_):
+        if df.empty or 'ba_ppm' not in df.columns:
+            return go.Figure().update_layout(title=dict(text="<b>Barium (Ba) Statistics: Not enough data.</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
 
-    # Add Boxplot
-    fig.add_trace(
-        go.Box(y=df['ba_ppm'], name='Boxplot'),
-        row=1, col=2
-    )
-
-    # Update layout
-    fig.update_layout(
-        title_text="<b>Statistics of Barium (Ba)</b>",
-        showlegend=False,
-        height=400,
-        title_x=0.5, # Center the title
-        title_y=0.9 # Adjust vertical position if needed
-    )
-
-    return fig
-        pass
+        # Create subplots: histogram and boxplot
+        fig = make_subplots(rows=1, cols=2, subplot_titles=('Histogram of Ba (ppm)', 'Boxplot of Ba (ppm)'))
+    
+        # Add Histogram
+        fig.add_trace(
+            go.Histogram(x=df['ba_ppm'], nbinsx=30, name='Histogram'),
+            row=1, col=1
+        )
+    
+        # Add Boxplot
+        fig.add_trace(
+            go.Box(y=df['ba_ppm'], name='Boxplot'),
+            row=1, col=2
+        )
+    
+        # Update layout
+        fig.update_layout(
+            title_text="<b>Statistics of Barium (Ba)</b>",
+            showlegend=False,
+            height=400,
+            title_x=0.5, # Center the title
+            title_y=0.9 # Adjust vertical position if needed
+        )
+    
+        return fig
+            pass
 
     @app.callback(
         Output('correlation-matrix', 'figure'),
