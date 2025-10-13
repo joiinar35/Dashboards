@@ -199,7 +199,7 @@ def data_viz_callbacks(app):
         )
     
         return fig
-            pass
+        pass
 
     @app.callback(
         Output('correlation-matrix', 'figure'),
@@ -304,4 +304,4 @@ def update_full_correlation_matrix(tab_value):
     )
 
     return fig
-        pass
+    pass
