@@ -171,7 +171,7 @@ def pca_analysis_callbacks(app):
         )
     
         return scatter_fig, scree_fig, heatmap_fig
-            pass
+        pass
 
    @app.callback(
         Output('cluster-map', 'figure'),
