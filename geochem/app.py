@@ -11,11 +11,11 @@ from pages.pair_matrix import pair_matrix_layout, pair_matrix_callbacks
 
 # Initialize the Dash app with Bootstrap theme
 app = Dash(
-    __name__, 
+    __name__,
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
         "/assets/style.css"  # Custom CSS
-    ], 
+    ],
     suppress_callback_exceptions=True
 )
 
@@ -23,9 +23,9 @@ app = Dash(
 app.layout = dbc.Container([
     # Header Row
     dbc.Row(
-        dbc.Col(html.H1("Interactive Geochemical Data Dashboard", 
-                       className="text-center my-4"), 
-               width=12),
+        dbc.Col(html.H1("Interactive Geochemical Data Dashboard",
+                        className="text-center my-4"),
+                width=12),
         className="mb-4 header-row"
     ),
 
@@ -33,15 +33,15 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col(
             dcc.Tabs(id='tabs', value='tab-data-viz', children=[
-                dcc.Tab(label='Data Visualization', value='tab-data-viz', 
-                       className='custom-tab', selected_className='custom-tab--selected'),
-                dcc.Tab(label='PCA Analysis', value='tab-pca', 
-                       className='custom-tab', selected_className='custom-tab--selected'),
-                dcc.Tab(label='Factor Analysis', value='tab-fa', 
-                       className='custom-tab', selected_className='custom-tab--selected'),
-                dcc.Tab(label='Pair Matrix', value='tab-pair-matrix', 
-                       className='custom-tab', selected_className='custom-tab--selected'),
-            ]), 
+                dcc.Tab(label='Data Visualization', value='tab-data-viz',
+                        className='custom-tab', selected_className='custom-tab--selected'),
+                dcc.Tab(label='PCA Analysis', value='tab-pca',
+                        className='custom-tab', selected_className='custom-tab--selected'),
+                dcc.Tab(label='Factor Analysis', value='tab-fa',
+                        className='custom-tab', selected_className='custom-tab--selected'),
+                dcc.Tab(label='Pair Matrix', value='tab-pair-matrix',
+                        className='custom-tab', selected_className='custom-tab--selected'),
+            ]),
             width=12
         )
     ], className="navigation-row"),
@@ -77,4 +77,4 @@ def render_page(tab):
 server = app.server
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run_server(debug=True)
