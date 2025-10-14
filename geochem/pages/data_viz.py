@@ -1,10 +1,10 @@
 from dash import dcc, html, Input, Output
 import dash_bootstrap_components as dbc
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 import numpy as np
 import geopandas as gpd
-from utils.data_loader import df, gdf, column_title_map, numeric_cols
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from ..utils.data_loader import df, gdf, column_title_map, numeric_cols
 from scipy.interpolate import griddata
 
 
@@ -64,6 +64,8 @@ def data_viz_callbacks(app):
         Input('column-dropdown', 'value')
     )
     def update_contour_map(selected_column):
+        ''' Mapa de contorno mostrando iteractivamente las abundancias del elemento selecconado en el dropdown '''
+        
         if df.empty or selected_column is None or 'x_utm' not in df.columns or 'y_utm' not in df.columns:
           return go.Figure().update_layout(
         title=dict(
@@ -140,6 +142,7 @@ def data_viz_callbacks(app):
         Input('column-dropdown', 'value')
     )
     def update_violin_boxplot(selected_column):
+        ''' Graficos de Violin y bixplot mostrando la estaditica del elemento seleccionado '''
 
         if df.empty or selected_column is None:
             return go.Figure().update_layout(title=dict(text="<b>Distribution Plots: Not enough data.</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
@@ -175,6 +178,8 @@ def data_viz_callbacks(app):
         Input('tabs', 'value')  # Trigger when the Data Visualization tab is selected
     )
     def update_full_correlation_matrix(tab_value):
+        ''' Matrix de correlacion de todos los elementos '''
+        
         if tab_value != 'tab-data-viz' or df.empty:
             return go.Figure().update_layout(title=dict(text="<b>Correlation Matrix of Geochemical Elements</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
     
