@@ -3,9 +3,11 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.express as px
+import numpy as np
+import geopandas as gpd
 from utils.data_loader import df, gdf, column_title_map, numeric_cols
 from scipy.interpolate import griddata
-import numpy as np
+
 
 # Get element columns for dropdown
 element_columns = df.columns[df.columns.get_loc('ba_ppm'):df.columns.get_loc('zn_ppm')+1]
@@ -20,7 +22,6 @@ data_viz_layout = dbc.Container([
             html.Ul([
                 html.Li(["The", html.Strong(" Distribution of Selected Element "), "plot shows the distribution of the chosen element using a violin and box plot."]),
                 html.Li(["The", html.Strong(" Interpolated Contour Map "), "visualizes the spatial distribution of the selected element using interpolated contours."]),
-                html.Li(["The", html.Strong(" Correlations of Selected Element "), "heatmap displays the correlation coefficients between the selected element and all other elements."]),
                 html.Li(["The", html.Strong(" Correlation Matrix "), "heatmap shows the correlation matrix for all available geochemical elements."])
             ])
         ], className="explanation-text"), width=12),
@@ -33,7 +34,7 @@ data_viz_layout = dbc.Container([
             dcc.Dropdown(
                 id='column-dropdown',
                 options=dropdown_options,
-                value=element_columns[0] if element_columns.any() else None,
+                value=element_columns[0] if len(element_columns) > 0 else None,
                 clearable=False
             ),
             html.Hr(),
@@ -65,8 +66,13 @@ def data_viz_callbacks(app):
     )
     def update_contour_map(selected_column):
         if df.empty or selected_column is None or 'x_utm' not in df.columns or 'y_utm' not in df.columns:
-            return go.Figure().update_layout(title=dict(text="<b>Interpolated Contour Map: Not enough data.</b>", x=0.5, xanchor="center", y=0.9, yanchor="top", font=dict(size=16, color="black", family="Arial")))
-
+          return go.Figure().update_layout(
+    title=dict(
+        text="<b>Interpolated Contour Map: Not enough data.</b>",
+        x=0.5, xanchor="center", y=0.9, yanchor="top",
+        font=dict(size=16, color="black", family="Arial")
+    )
+)
         # Crear geometría a partir de x_utm y y_utm
         geometry = gpd.points_from_xy(df.x_utm, df.y_utm)
     
@@ -130,7 +136,7 @@ def data_viz_callbacks(app):
         )
     
         return fig
-        pass
+    
 
     @app.callback(
         Output('violin-boxplot-plot', 'figure'),
@@ -165,70 +171,6 @@ def data_viz_callbacks(app):
         )
     
         return fig
-# Callback to generate plots for 'ba_ppm' statistics
-    @app.callback(
-    Output('ba_ppm_stats_plots', 'figure'),
-    Input('controls', 'children') # Dummy input, triggers on initial load
-    )
-    def update_ba_ppm_stats_plots(_):
-        if df.empty or 'ba_ppm' not in df.columns:
-            return go.Figure().update_layout(title=dict(text="<b>Barium (Ba) Statistics: Not enough data.</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
-
-        # Create subplots: histogram and boxplot
-        fig = make_subplots(rows=1, cols=2, subplot_titles=('Histogram of Ba (ppm)', 'Boxplot of Ba (ppm)'))
-    
-        # Add Histogram
-        fig.add_trace(
-            go.Histogram(x=df['ba_ppm'], nbinsx=30, name='Histogram'),
-            row=1, col=1
-        )
-    
-        # Add Boxplot
-        fig.add_trace(
-            go.Box(y=df['ba_ppm'], name='Boxplot'),
-            row=1, col=2
-        )
-    
-        # Update layout
-        fig.update_layout(
-            title_text="<b>Statistics of Barium (Ba)</b>",
-            showlegend=False,
-            height=400,
-            title_x=0.5, # Center the title
-            title_y=0.9 # Adjust vertical position if needed
-        )
-    
-        return fig
-        pass
-
-    @app.callback(
-        Output('correlation-matrix', 'figure'),
-        Input('column-dropdown', 'value')
-    )
-    def update_element_correlations(selected_column):
-        if df.empty or selected_column is None:
-            return go.Figure().update_layout(title=dict(text="<b>Element Correlations: Not enough data.</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
-    
-        # Seleccionar columnas numéricas (elementos)
-        elementos = df.select_dtypes(include=['float64', 'int64'])
-    
-        # Eliminar columnas de coordenadas si existen
-        if 'x_utm' in elementos.columns:
-            elementos = elementos.drop(columns=['x_utm'])
-        if 'y_utm' in elementos.columns:
-            elementos = elementos.drop(columns=['y_utm'])
-    
-        # Si el dataset es muy grande, tomar una muestra para hacer el cálculo más rápido
-        if len(elementos) > 1000:
-            elementos = elementos.sample(n=1000, random_state=42)
-    
-        # Calcular matriz de correlación
-        corr_matrix = elementos.corr()
-    
-        # Verificar que el elemento seleccionado existe en la matriz de correlación
-        if selected_column not in corr_matrix.columns:
-            return go.Figure().update_layout(title=dict(text=f"<b>Element Correlations: Column '{selected_column}' not found in data.</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
-
 
 # Callback to update the full correlation matrix heatmap
 @app.callback(
@@ -304,4 +246,4 @@ def update_full_correlation_matrix(tab_value):
     )
 
     return fig
-    pass
+
