@@ -2,7 +2,6 @@ from dash import dcc, html, Input, Output
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import plotly.express as px
 import numpy as np
 import geopandas as gpd
 from utils.data_loader import df, gdf, column_title_map, numeric_cols
@@ -67,12 +66,10 @@ def data_viz_callbacks(app):
     def update_contour_map(selected_column):
         if df.empty or selected_column is None or 'x_utm' not in df.columns or 'y_utm' not in df.columns:
           return go.Figure().update_layout(
-    title=dict(
-        text="<b>Interpolated Contour Map: Not enough data.</b>",
-        x=0.5, xanchor="center", y=0.9, yanchor="top",
-        font=dict(size=16, color="black", family="Arial")
-    )
-)
+        title=dict(
+            text="<b>Interpolated Contour Map: Not enough data.</b>", x=0.5, xanchor="center", y=0.9, yanchor="top",\
+            font=dict(size=16, color="black", family="Arial")))
+            
         # Crear geometría a partir de x_utm y y_utm
         geometry = gpd.points_from_xy(df.x_utm, df.y_utm)
     
@@ -173,77 +170,77 @@ def data_viz_callbacks(app):
         return fig
 
 # Callback to update the full correlation matrix heatmap
-@app.callback(
-    Output('correlation-matrix', 'figure'),
-    Input('tabs', 'value')  # Trigger when the Data Visualization tab is selected
-)
-def update_full_correlation_matrix(tab_value):
-    if tab_value != 'tab-data-viz' or df.empty:
-        return go.Figure().update_layout(title=dict(text="<b>Correlation Matrix of Geochemical Elements</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
-
-    # Seleccionar columnas numéricas (elementos)
-    elementos = df.select_dtypes(include=['float64', 'int64'])
-
-    # Eliminar columnas de coordenadas si existen
-    if 'x_utm' in elementos.columns:
-        elementos = elementos.drop(columns=['x_utm'])
-    if 'y_utm' in elementos.columns:
-        elementos = elementos.drop(columns=['y_utm'])
-
-    # Si el dataset es muy grande, tomar una muestra para hacer el gráfico más rápido
-    if len(elementos) > 1000:
-        elementos = elementos.sample(n=1000, random_state=42)
-        print("Se tomó una muestra de 1000 puntos para acelerar la visualización de la matriz de correlación")
-
-
-    # Calcular matriz de correlación
-    corr_matrix = elementos.corr().round(2)
-     # Redondear a 2 decimales
-
-    # Crear heatmap de correlación con Plotly
-    fig = go.Figure(data=go.Heatmap(
-        z=corr_matrix.values,
-        x=corr_matrix.columns,
-        y=corr_matrix.index,
-        colorscale='RdBu',
-        zmin=-1,
-        zmax=1,
-        hoverongaps=False,
-        hovertemplate='Correlación entre %{x} y %{y}: %{z:.3f}<extra></extra>',
-        colorbar=dict(
-            title='<b>Correlation Coefficient</b>',
-            titleside='right'
-        )
-    ))
-
-    # Añadir anotaciones (valores de correlación en cada celda)
-    annotations = []
-    for i, row in enumerate(corr_matrix.values):
-        for j, value in enumerate(row):
-            # Color del texto basado en el valor de correlación (blanco para valores extremos)
-            font_color = 'white' if abs(value) > 0.7 else 'black'
-
-            annotations.append(
-                dict(
-                    x=corr_matrix.columns[j],
-                    y=corr_matrix.index[i],
-                    text=f'{value:.2f}',
-                    showarrow=False,
-                    font=dict(color=font_color, size=10),
-                    bgcolor='rgba(255,255,255,0.5)' if abs(value) < 0.3 else 'rgba(0,0,0,0)'
-                )
-            )
-
-    fig.update_layout(
-        title=dict(text='<b>Correlation Matrix of Geochemical Elements</b>', x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")),
-        xaxis=dict(title='Elements', tickangle=-45),
-        yaxis=dict(title='Elements'),
-        annotations=annotations,
-        height=600,
-        margin=dict(l=100, r=50, t=80, b=100),
-        title_x=0.5, # Center the title
-        title_y=0.9 # Adjust vertical position if needed
+    @app.callback(
+        Output('correlation-matrix', 'figure'),
+        Input('tabs', 'value')  # Trigger when the Data Visualization tab is selected
     )
-
-    return fig
+    def update_full_correlation_matrix(tab_value):
+        if tab_value != 'tab-data-viz' or df.empty:
+            return go.Figure().update_layout(title=dict(text="<b>Correlation Matrix of Geochemical Elements</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
+    
+        # Seleccionar columnas numéricas (elementos)
+        elementos = df.select_dtypes(include=['float64', 'int64'])
+    
+        # Eliminar columnas de coordenadas si existen
+        if 'x_utm' in elementos.columns:
+            elementos = elementos.drop(columns=['x_utm'])
+        if 'y_utm' in elementos.columns:
+            elementos = elementos.drop(columns=['y_utm'])
+    
+        # Si el dataset es muy grande, tomar una muestra para hacer el gráfico más rápido
+        if len(elementos) > 1000:
+            elementos = elementos.sample(n=1000, random_state=42)
+            print("Se tomó una muestra de 1000 puntos para acelerar la visualización de la matriz de correlación")
+    
+    
+        # Calcular matriz de correlación
+        corr_matrix = elementos.corr().round(2)
+         # Redondear a 2 decimales
+    
+        # Crear heatmap de correlación con Plotly
+        fig = go.Figure(data=go.Heatmap(
+            z=corr_matrix.values,
+            x=corr_matrix.columns,
+            y=corr_matrix.index,
+            colorscale='RdBu',
+            zmin=-1,
+            zmax=1,
+            hoverongaps=False,
+            hovertemplate='Correlación entre %{x} y %{y}: %{z:.3f}<extra></extra>',
+            colorbar=dict(
+                title='<b>Correlation Coefficient</b>',
+                titleside='right'
+            )
+        ))
+    
+        # Añadir anotaciones (valores de correlación en cada celda)
+        annotations = []
+        for i, row in enumerate(corr_matrix.values):
+            for j, value in enumerate(row):
+                # Color del texto basado en el valor de correlación (blanco para valores extremos)
+                font_color = 'white' if abs(value) > 0.7 else 'black'
+    
+                annotations.append(
+                    dict(
+                        x=corr_matrix.columns[j],
+                        y=corr_matrix.index[i],
+                        text=f'{value:.2f}',
+                        showarrow=False,
+                        font=dict(color=font_color, size=10),
+                        bgcolor='rgba(255,255,255,0.5)' if abs(value) < 0.3 else 'rgba(0,0,0,0)'
+                    )
+                )
+    
+        fig.update_layout(
+            title=dict(text='<b>Correlation Matrix of Geochemical Elements</b>', x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")),
+            xaxis=dict(title='Elements', tickangle=-45),
+            yaxis=dict(title='Elements'),
+            annotations=annotations,
+            height=600,
+            margin=dict(l=100, r=50, t=80, b=100),
+            title_x=0.5, # Center the title
+            title_y=0.9 # Adjust vertical position if needed
+        )
+    
+        return fig
 
