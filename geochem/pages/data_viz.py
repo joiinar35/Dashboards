@@ -1,12 +1,14 @@
-from dash import dcc, html, Input, Output
-import dash_bootstrap_components as dbc
 import numpy as np
 import geopandas as gpd
+from dash import dcc, html, Input, Output
+import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from ..utils.data_loader import df, gdf, column_title_map, numeric_cols
 from scipy.interpolate import griddata
-
+try:
+    from ..utils.data_loader import df, gdf, column_title_map, numeric_cols
+except ImportError:
+    from utils.data_loader import df, gdf, column_title_map, numeric_cols
 
 # Get element columns for dropdown
 element_columns = df.columns[df.columns.get_loc('ba_ppm'):df.columns.get_loc('zn_ppm')+1]
