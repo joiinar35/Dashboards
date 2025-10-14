@@ -182,9 +182,14 @@ def data_viz_callbacks(app):
     def update_full_correlation_matrix(tab_value):
         ''' Matrix de correlacion de todos los elementos '''
         
-        if tab_value != 'tab-data-viz' or df.empty:
-            return go.Figure().update_layout(title=dict(text="<b>Correlation Matrix of Geochemical Elements</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
-    
+       if df.empty:
+    return go.Figure().update_layout(
+        title=dict(
+            text="<b>Correlation Matrix of Geochemical Elements</b>",
+            x=0.5, y=0.9, xanchor="center", yanchor="top",
+            font=dict(size=16, color="black", family="Arial")
+        )
+    )
         # Seleccionar columnas numéricas (elementos)
         elementos = df.select_dtypes(include=['float64', 'int64'])
     
