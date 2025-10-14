@@ -174,10 +174,10 @@ def data_viz_callbacks(app):
     
         return fig
 
-# Callback to update the full correlation matrix heatmap
+    # Callback to update the full correlation matrix heatmap
     @app.callback(
         Output('correlation-matrix', 'figure'),
-        Input('tabs', 'value')  # Trigger when the Data Visualization tab is selected
+        Input('column-dropdown', 'value') # Trigger when the Data Visualization tab is selected
     )
     def update_full_correlation_matrix(tab_value):
         ''' Matrix de correlacion de todos los elementos '''
