@@ -71,8 +71,7 @@ def data_viz_callbacks(app):
         if df.empty or selected_column is None or 'x_utm' not in df.columns or 'y_utm' not in df.columns:
           return go.Figure().update_layout(
         title=dict(
-            text="<b>Interpolated Contour Map: Not enough data.</b>", x=0.5, xanchor="center", y=0.9, yanchor="top",\
-            font=dict(size=16, color="black", family="Arial")))
+            text="<b>Interpolated Contour Map: Not enough data.</b>", x=0.5, xanchor="center", y=0.9, yanchor="top", font=dict(size=16, color="black", family="Arial")))
             
         # Crear geometría a partir de x_utm y y_utm
         geometry = gpd.points_from_xy(df.x_utm, df.y_utm)
@@ -147,7 +146,8 @@ def data_viz_callbacks(app):
         ''' Graficos de Violin y bixplot mostrando la estaditica del elemento seleccionado '''
 
         if df.empty or selected_column is None:
-            return go.Figure().update_layout(title=dict(text="<b>Distribution Plots: Not enough data.</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
+            return go.Figure().update_layout(title=dict(text="<b>Distribution Plots: Not enough data.</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", \ 
+                                                        font=dict(size=16, color="black", family="Arial")))
 
         fig = make_subplots(rows=1, cols=2, subplot_titles=(f'Violin Plot of {selected_column}', f'Box Plot of {selected_column}'))
     
