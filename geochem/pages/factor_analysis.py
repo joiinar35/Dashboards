@@ -78,6 +78,7 @@ def factor_analysis_callbacks(app):
      Input('n-factors-dropdown', 'value')] # Added input for dropdown
     )
     def update_fa_plots(tab_value, n_factors):
+         """Update Factor Analysis plots and maps based on selected tab and number of factors."""
     # Access global df and data_for_analysis here
         global df, data_for_analysis
     # Initialize figures and map children for empty state
@@ -98,31 +99,28 @@ def factor_analysis_callbacks(app):
         # Re-run Factor Analysis with the selected number of factors
         # Ensure n_factors is valid and less than or equal to the number of features
         valid_n_factors = min(n_factors if n_factors is not None else 1, len(data_for_analysis.columns) if not data_for_analysis.empty else 0)
-    
         if valid_n_factors < 1:
              scree_fig_fa.update_layout(title=dict(text="<b>Factor Analysis Scree Plot: Not enough data or factors selected.</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
              variance_fig_fa.update_layout(title=dict(text="<b>Factor Analysis Explained Variance: Not enough data or factors selected.</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
              heatmap_fig_fa.update_layout(title=dict(text="<b>Factor Analysis Loadings Heatmap: Not enough data or factors selected.</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
              map_rows = [dbc.Row(dbc.Col(html.Div("Not enough data or factors selected for Factor Analysis maps."), width=12))]
              return scree_fig_fa, variance_fig_fa, heatmap_fig_fa, map_rows
-    
-    
-        try:
-            fa = FactorAnalyzer(rotation='varimax', n_factors=valid_n_factors)
-            fa.fit(data_for_analysis)
-            eigenvalues_fa, _ = fa.get_eigenvalues()
-            fa_loadings = fa.loadings_
-            fa_variance = fa.get_factor_variance()
-            fa_scores = fa.transform(data_for_analysis)
-            fa_scores_df = pd.DataFrame(fa_scores, columns=[f'Factor_{i+1}_Score' for i in range(fa_scores.shape[1])])
-            fa_scores_df = fa_scores_df.set_index(data_for_analysis.index)
-        except Exception as e:
-            print(f"Error during Factor Analysis fit or transformation: {e}")
-            scree_fig_fa.update_layout(title=dict(text=f"<b>Factor Analysis Scree Plot: Error ({e}).</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
-            variance_fig_fa.update_layout(title=dict(text=f"<b>Factor Analysis Explained Variance: Error ({e}).</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
-            heatmap_fig_fa.update_layout(title=dict(text=f"<b>Factor Analysis Loadings Heatmap: Error ({e}).</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
-            map_rows = [dbc.Row(dbc.Col(html.Div(f"Error during Factor Analysis: {e}"), width=12))]
-            return scree_fig_fa, variance_fig_fa, heatmap_fig_fa, map_rows
+         try:
+             fa = FactorAnalyzer(rotation='varimax', n_factors=valid_n_factors)
+             fa.fit(data_for_analysis)
+             eigenvalues_fa, _ = fa.get_eigenvalues()
+             fa_loadings = fa.loadings_
+             fa_variance = fa.get_factor_variance()
+             fa_scores = fa.transform(data_for_analysis)
+             fa_scores_df = pd.DataFrame(fa_scores, columns=[f'Factor_{i+1}_Score' for i in range(fa_scores.shape[1])])
+             fa_scores_df = fa_scores_df.set_index(data_for_analysis.index)
+         except Exception as e:
+             print(f"Error during Factor Analysis fit or transformation: {e}")
+             scree_fig_fa.update_layout(title=dict(text=f"<b>Factor Analysis Scree Plot: Error ({e}).</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
+             variance_fig_fa.update_layout(title=dict(text=f"<b>Factor Analysis Explained Variance: Error ({e}).</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
+             heatmap_fig_fa.update_layout(title=dict(text=f"<b>Factor Analysis Loadings Heatmap: Error ({e}).</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
+             map_rows = [dbc.Row(dbc.Col(html.Div(f"Error during Factor Analysis: {e}"), width=12))]
+             return scree_fig_fa, variance_fig_fa, heatmap_fig_fa, map_rows
 
 
     # --- Update FA Scree Plot ---
