@@ -67,6 +67,9 @@ factor_analysis_layout = dbc.Container([
     ])
 ], fluid=True)
 
+dcc.Store(id='df-store', data=df.to_dict('records'))
+dcc.Store(id='data-for-analysis-store', data=data_for_analysis.to_dict('records'))
+
 # Callbacks for Factor Analysis page
 def factor_analysis_callbacks(app):
     @app.callback(
@@ -74,13 +77,14 @@ def factor_analysis_callbacks(app):
      Output('fa-variance-plot', 'figure'),
      Output('fa-loadings-heatmap', 'figure'),
      Output('factor-score-maps-row', 'children')], # Output for dynamic maps
-     [Input('tabs', 'value'),
+     [Input('tabs', 'value'), Input('df-store', 'data'), Input('data-for-analysis-store', 'data'),
      Input('n-factors-dropdown', 'value')] # Added input for dropdown
     )
-    def update_fa_plots(tab_value, n_factors):
+    def update_fa_plots(df_data, data_for_analysis_data,tab_value, n_factors):
          """Update Factor Analysis plots and maps based on selected tab and number of factors."""
     # Access global df and data_for_analysis here
-        global df, data_for_analysis
+         df = pd.DataFrame(df_data)
+        data_for_analysis = pd.DataFrame(data_for_analysis_data)
     # Initialize figures and map children for empty state
         scree_fig_fa = go.Figure()
         variance_fig_fa = go.Figure()
