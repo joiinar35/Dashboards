@@ -1,3 +1,5 @@
+import pandas as pd
+import geopandas as gpd
 from dash import dcc, html, Input, Output
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
@@ -72,20 +74,19 @@ def factor_analysis_callbacks(app):
      Output('fa-variance-plot', 'figure'),
      Output('fa-loadings-heatmap', 'figure'),
      Output('factor-score-maps-row', 'children')], # Output for dynamic maps
-    [Input('tabs', 'value'),
+     [Input('tabs', 'value'),
      Input('n-factors-dropdown', 'value')] # Added input for dropdown
     )
     def update_fa_plots(tab_value, n_factors):
     # Access global df and data_for_analysis here
         global df, data_for_analysis
-
     # Initialize figures and map children for empty state
         scree_fig_fa = go.Figure()
         variance_fig_fa = go.Figure()
         heatmap_fig_fa = go.Figure()
         map_rows = []
-
-
+        
+        
         if tab_value != 'tab-fa' or data_for_analysis.empty:
             scree_fig_fa.update_layout(title=dict(text="<b>Factor Analysis Scree Plot: Not enough data.</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
             variance_fig_fa.update_layout(title=dict(text="<b>Factor Analysis Explained Variance: Not enough data.</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
@@ -94,8 +95,8 @@ def factor_analysis_callbacks(app):
             return scree_fig_fa, variance_fig_fa, heatmap_fig_fa, map_rows
 
 
-    # Re-run Factor Analysis with the selected number of factors
-    # Ensure n_factors is valid and less than or equal to the number of features
+        # Re-run Factor Analysis with the selected number of factors
+        # Ensure n_factors is valid and less than or equal to the number of features
         valid_n_factors = min(n_factors if n_factors is not None else 1, len(data_for_analysis.columns) if not data_for_analysis.empty else 0)
     
         if valid_n_factors < 1:
@@ -200,7 +201,7 @@ def factor_analysis_callbacks(app):
                                     title='<b>Loading Value</b>',
                                     titleside='right'
                                 )))
-    
+            
              heatmap_fig_fa.update_layout(
                  title=dict(text='<b>Factor Analysis Loadings Heatmap</b>', x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")),
                  xaxis_title='Factor',
@@ -209,7 +210,7 @@ def factor_analysis_callbacks(app):
              )
         else:
             heatmap_fig_fa.update_layout(title=dict(text="<b>Factor Analysis Loadings Heatmap: Loadings data not available or shape mismatch.</b>", x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
-
+        
 
     # --- Generate Factor Score Maps ---
         map_rows = []
@@ -245,24 +246,24 @@ def factor_analysis_callbacks(app):
             print(f"Error creating GeoDataFrame for factor scores: {e}")
             map_rows = [dbc.Row(dbc.Col(html.Div(f"Error creating geographic data for factor scores: {e}"), width=12))]
             return scree_fig_fa, variance_fig_fa, heatmap_fig_fa, map_rows
-
+        
         # Check if gdf_fa_scores is empty after creation
         if gdf_fa_scores.empty:
              print("Error: GeoDataFrame for factor scores is empty.")
              map_rows = [dbc.Row(dbc.Col(html.Div("No geographic data for factor scores."), width=12))]
              return scree_fig_fa, variance_fig_fa, heatmap_fig_fa, map_rows
-
-
+        
+        
         # Convert coordinates to numpy array for interpolation
         points = np.array([gdf_fa_scores.geometry.x, gdf_fa_scores.geometry.y]).T
-
+        
         # Create map for each factor score
         map_cols = []
         for i in range(valid_n_factors):
             factor_score_col = f'Factor_{i+1}_Score'
             if factor_score_col in gdf_fa_scores.columns: # Check if the factor score column exists
                 values = gdf_fa_scores[factor_score_col].values # Use values from gdf_fa_scores
-
+        
                 # Check if there are enough points for interpolation (at least 4 points and variation in both x and y)
                 if len(points) < 4 or len(np.unique(points[:, 0])) < 2 or len(np.unique(points[:, 1])) < 2:
                     print(f"Warning: Not enough unique points for interpolation for Factor {i+1}.")
@@ -275,12 +276,12 @@ def factor_analysis_callbacks(app):
                     xi = np.linspace(x_min, x_max, grid_density)
                     yi = np.linspace(y_min, y_max, grid_density)
                     xi, yi = np.meshgrid(xi, yi)
-
+        
                     # Interpolation using the cubic method
                     # Handle potential errors during interpolation
                     try:
                         grid_values = griddata(points, values, (xi, yi), method='cubic')
-
+        
                         # Create contour map for the factor score
                         map_fig = go.Figure(data=go.Contour(
                             z=grid_values,
@@ -299,7 +300,7 @@ def factor_analysis_callbacks(app):
                                 titleside='right'
                             )
                         ))
-
+            
                         map_fig.update_layout(
                             title=dict(text=f'<b>Interpolated Factor {i+1} Score Map</b>', x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")),
                              xaxis=dict(showticklabels=False, showgrid=False, zeroline=False, showline=False, ticks=''),
@@ -309,23 +310,23 @@ def factor_analysis_callbacks(app):
                     except Exception as e:
                          print(f"Error during interpolation for Factor {i+1}: {e}")
                          map_fig = go.Figure().update_layout(title=dict(text=f'<b>Factor {i+1} Score Map: Error during interpolation.</b>', x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
-
+            
             else:
                  # Return empty figure if the factor score column doesn't exist (shouldn't happen with correct n_factors)
                  map_fig = go.Figure().update_layout(title=dict(text=f'<b>Factor {i+1} Score Map: Data not available.</b>', x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")))
-
-
+            
+            
             map_cols.append(dbc.Col(dcc.Graph(figure=map_fig), width=6)) # Arrange maps in two columns
-
+        
         # Group maps into rows (two maps per row)
-
+        
         for i in range(0, len(map_cols), 2):
             map_rows.append(dbc.Row(map_cols[i:i+2], className="mb-4"))
+        
+        # else:
+        #  print("Error: Index mismatch when adding coordinates to factor scores.")
+        #  map_rows = [dbc.Row(dbc.Col(html.Div("Index mismatch when adding coordinates for factor score maps."), width=12))]
 
-        else:
-         print("Error: Index mismatch when adding coordinates to factor scores.")
-         map_rows = [dbc.Row(dbc.Col(html.Div("Index mismatch when adding coordinates for factor score maps."), width=12))]
-
-
+        
         return scree_fig_fa, variance_fig_fa, heatmap_fig_fa, map_rows
-        pass
+        
