@@ -67,8 +67,8 @@ factor_analysis_layout = dbc.Container([
     ])
 ], fluid=True)
 
-dcc.Store(id='df-store', data=df.to_dict('records'))
-dcc.Store(id='data-for-analysis-store', data=data_for_analysis.to_dict('records'))
+    dcc.Store(id='df-store', data=df.to_dict('records'))
+    dcc.Store(id='data-for-analysis-store', data=data_for_analysis.to_dict('records'))
 
 # Callbacks for Factor Analysis page
 def factor_analysis_callbacks(app):
