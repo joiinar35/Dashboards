@@ -1,7 +1,7 @@
 # Main Python script
 from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
-from dash.dependencies import Input, Output
+from dash import Input, Output
 
 # Import pages
 from pages.data_viz import data_viz_layout, data_viz_callbacks
@@ -14,7 +14,7 @@ app = Dash(
     __name__,
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
-        "/assets/style.css"  # Custom CSS
+        "assets/style.css"  # Custom CSS
     ],
     suppress_callback_exceptions=True
 )
