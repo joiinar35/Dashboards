@@ -1,12 +1,15 @@
+"""
+Data Visualization page and callbacks for interactive geochemical data exploration.
+"""
+
 import numpy as np
-import geopandas as gpd
 from dash import dcc, html, Input, Output, callback, no_update
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from scipy.interpolate import griddata
 
-# Robust import for shared data and mappings
+# Import shared data and mappings, robust to various execution contexts
 try:
     from ..utils.data_loader import df, gdf, column_title_map, numeric_cols
 except ImportError:
@@ -14,15 +17,15 @@ except ImportError:
 
 # Helper: get element columns for dropdown (robust to missing columns)
 def get_element_columns():
-    try:
+    """Return columns representing elements for dropdown selection."""
+    if 'ba_ppm' in df.columns and 'zn_ppm' in df.columns:
         start = df.columns.get_loc('ba_ppm')
         end = df.columns.get_loc('zn_ppm') + 1
         return df.columns[start:end]
-    except Exception:
-        # fallback: use numeric_cols if defined, or all numeric columns
-        if 'numeric_cols' in globals() and numeric_cols is not None:
-            return numeric_cols
-        return df.select_dtypes(include=[np.number]).columns
+    # fallback: use numeric_cols if defined, or all numeric columns
+    if 'numeric_cols' in globals() and numeric_cols is not None:
+        return numeric_cols
+    return df.select_dtypes(include=[np.number]).columns
 
 element_columns = get_element_columns()
 dropdown_options = [
@@ -85,14 +88,18 @@ def data_viz_callbacks(app):
         Output('contour-map', 'figure'),
         Input('column-dropdown', 'value')
     )
-    def update_contour_map(selected_column):
+    def update_contour_map(selected_column: str):
         """
         Interactive map of the selected element using spatial interpolation (contour plot).
         """
         # Check for required columns and data
-        if (df.empty or selected_column is None or
-            'x_utm' not in df.columns or 'y_utm' not in df.columns or
-            df[selected_column].isnull().all()):
+        if (
+            df.empty or
+            selected_column is None or
+            'x_utm' not in df.columns or
+            'y_utm' not in df.columns or
+            df[selected_column].isnull().all()
+        ):
             return go.Figure().update_layout(
                 title=dict(
                     text="<b>Interpolated Contour Map: Not enough data.</b>",
@@ -108,9 +115,9 @@ def data_viz_callbacks(app):
                     x=0.5, xanchor="center", y=0.9, yanchor="top",
                     font=dict(size=16, color="black", family="Arial"))
             )
-        x = mask['x_utm']
-        y = mask['y_utm']
-        values = mask[selected_column]
+        x = mask['x_utm'].values
+        y = mask['y_utm'].values
+        values = mask[selected_column].values
         # Interpolation grid
         grid_density = 100  # tune for performance
         try:
@@ -123,7 +130,8 @@ def data_viz_callbacks(app):
             xi, yi = np.meshgrid(xi, yi)
             grid_values = griddata((x, y), values, (xi, yi), method='cubic')
             # Remove negative interpolations
-            grid_values = np.where(grid_values < 0, 0, grid_values)
+            if grid_values is not None:
+                grid_values = np.where(grid_values < 0, 0, grid_values)
         except Exception:
             return go.Figure().update_layout(
                 title=dict(
@@ -150,7 +158,7 @@ def data_viz_callbacks(app):
                 titleside='right'
             )
         ))
-        # Optionally overlay sample locations (dots)
+        # Overlay sample locations (dots)
         fig.add_trace(go.Scatter(
             x=x, y=y,
             mode='markers',
@@ -185,11 +193,15 @@ def data_viz_callbacks(app):
         Output('violin-boxplot-plot', 'figure'),
         Input('column-dropdown', 'value')
     )
-    def update_violin_boxplot(selected_column):
+    def update_violin_boxplot(selected_column: str):
         """
         Violin & Box plot for the selected element.
         """
-        if df.empty or selected_column is None or df[selected_column].dropna().empty:
+        if (
+            df.empty or
+            selected_column is None or
+            df[selected_column].dropna().empty
+        ):
             return go.Figure().update_layout(
                 title=dict(
                     text="<b>Distribution Plots: Not enough data.</b>",
@@ -198,7 +210,6 @@ def data_viz_callbacks(app):
                 )
             )
         clean_vals = df[selected_column].dropna()
-        # Remove non-finite values
         clean_vals = clean_vals[np.isfinite(clean_vals)]
         if clean_vals.empty:
             return go.Figure().update_layout(
@@ -242,7 +253,6 @@ def data_viz_callbacks(app):
         """
         Correlation matrix for all available numeric columns (elements).
         """
-        # Pick numeric columns and remove spatial coordinates
         if df.empty:
             return go.Figure().update_layout(
                 title=dict(
@@ -257,8 +267,8 @@ def data_viz_callbacks(app):
                 elementos = elementos.drop(columns=[col])
         # Use only columns with at least some non-null values
         elementos = elementos.dropna(axis=1, how='all')
-        # Sample if too large
-        if len(elementos) > 1000:
+        # Sample rows if too large (performance)
+        if elementos.shape[0] > 1000:
             elementos = elementos.sample(n=1000, random_state=42)
         if elementos.shape[1] == 0:
             return go.Figure().update_layout(
@@ -269,7 +279,6 @@ def data_viz_callbacks(app):
                 )
             )
         corr_matrix = elementos.corr().round(2)
-        # Colorscale, zmin/zmax
         fig = go.Figure(data=go.Heatmap(
             z=corr_matrix.values,
             x=[column_title_map.get(c, c) for c in corr_matrix.columns],
@@ -283,7 +292,7 @@ def data_viz_callbacks(app):
                 titleside='right'
             )
         ))
-        # Annotations
+        # Annotations: show values on the heatmap
         annotations = []
         for i, row in enumerate(corr_matrix.values):
             for j, value in enumerate(row):
