@@ -146,13 +146,13 @@ def data_viz_callbacks(app):
         ''' Graficos de Violin y bixplot mostrando la estaditica del elemento seleccionado '''
 
         if df.empty or selected_column is None:
-    return go.Figure().update_layout(
-        title=dict(
-            text="<b>Distribution Plots: Not enough data.</b>",
-            x=0.5, y=0.9, xanchor="center", yanchor="top",
-            font=dict(size=16, color="black", family="Arial")
-        )
-    )
+            return go.Figure().update_layout(
+                title=dict(
+                    text="<b>Distribution Plots: Not enough data.</b>",
+                    x=0.5, y=0.9, xanchor="center", yanchor="top",
+                    font=dict(size=16, color="black", family="Arial")
+                )
+            )
 
         fig = make_subplots(rows=1, cols=2, subplot_titles=(f'Violin Plot of {selected_column}', f'Box Plot of {selected_column}'))
     
@@ -187,14 +187,14 @@ def data_viz_callbacks(app):
     def update_full_correlation_matrix(tab_value):
         ''' Matrix de correlacion de todos los elementos '''
         
-       if df.empty:
-    return go.Figure().update_layout(
-        title=dict(
-            text="<b>Correlation Matrix of Geochemical Elements</b>",
-            x=0.5, y=0.9, xanchor="center", yanchor="top",
-            font=dict(size=16, color="black", family="Arial")
+      if df.empty:
+        return go.Figure().update_layout(
+            title=dict(
+                text="<b>Correlation Matrix of Geochemical Elements</b>",
+                x=0.5, y=0.9, xanchor="center", yanchor="top",
+                font=dict(size=16, color="black", family="Arial")
+            )
         )
-    )
         # Seleccionar columnas numéricas (elementos)
         elementos = df.select_dtypes(include=['float64', 'int64'])
     
