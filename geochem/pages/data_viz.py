@@ -1,33 +1,54 @@
 import numpy as np
 import geopandas as gpd
-from dash import dcc, html, Input, Output
+from dash import dcc, html, Input, Output, callback, no_update
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from scipy.interpolate import griddata
+
+# Robust import for shared data and mappings
 try:
     from ..utils.data_loader import df, gdf, column_title_map, numeric_cols
 except ImportError:
     from utils.data_loader import df, gdf, column_title_map, numeric_cols
 
-# Get element columns for dropdown
-element_columns = df.columns[df.columns.get_loc('ba_ppm'):df.columns.get_loc('zn_ppm')+1]
-dropdown_options = [{'label': col, 'value': col} for col in element_columns]
+# Helper: get element columns for dropdown (robust to missing columns)
+def get_element_columns():
+    try:
+        start = df.columns.get_loc('ba_ppm')
+        end = df.columns.get_loc('zn_ppm') + 1
+        return df.columns[start:end]
+    except Exception:
+        # fallback: use numeric_cols if defined, or all numeric columns
+        if 'numeric_cols' in globals() and numeric_cols is not None:
+            return numeric_cols
+        return df.select_dtypes(include=[np.number]).columns
+
+element_columns = get_element_columns()
+dropdown_options = [
+    {'label': column_title_map.get(col, col), 'value': col}
+    for col in element_columns
+]
 
 # Layout for Data Visualization page
 data_viz_layout = dbc.Container([
     dbc.Row([
         dbc.Col(html.Div([
-            html.P("This tab provides interactive visualizations of the geochemical data from a given geographical location from a given set of samples."),
-            html.P("You can select an element from the dropdown menu on the left to explore its distribution and correlations with other elements."),
+            html.P("This tab provides interactive visualizations of the geochemical data from a given geographical location and sample set."),
+            html.P("Select an element to explore its distribution and correlations."),
             html.Ul([
-                html.Li(["The", html.Strong(" Distribution of Selected Element "), "plot shows the distribution of the chosen element using a violin and box plot."]),
-                html.Li(["The", html.Strong(" Interpolated Contour Map "), "visualizes the spatial distribution of the selected element using interpolated contours."]),
-                html.Li(["The", html.Strong(" Correlation Matrix "), "heatmap shows the correlation matrix for all available geochemical elements."])
+                html.Li([
+                    "The ", html.Strong("Distribution of Selected Element"), " plot shows the distribution using violin and box plot."
+                ]),
+                html.Li([
+                    "The ", html.Strong("Interpolated Contour Map"), " visualizes the spatial distribution with interpolated contours."
+                ]),
+                html.Li([
+                    "The ", html.Strong("Correlation Matrix"), " heatmap shows the correlation matrix for all geochemical elements."
+                ])
             ])
         ], className="explanation-text"), width=12),
     ]),
-    
     dbc.Row([
         # Sidebar
         dbc.Col([
@@ -36,69 +57,84 @@ data_viz_layout = dbc.Container([
                 id='column-dropdown',
                 options=dropdown_options,
                 value=element_columns[0] if len(element_columns) > 0 else None,
-                clearable=False
+                clearable=False,
+                style={"margin-bottom": "1rem"}
             ),
             html.Hr(),
             html.Div(id='controls')
         ], width=3, className="sidebar"),
-        
         # Main content
         dbc.Col([
             dbc.Row([
-                dbc.Col(dcc.Graph(id='contour-map'), width=12),
+                dbc.Col(dcc.Graph(id='contour-map', config={"displayModeBar": False}), width=12),
             ], className="graph-container"),
-            
             dbc.Row([
-                dbc.Col(dcc.Graph(id='violin-boxplot-plot'), width=12),
+                dbc.Col(dcc.Graph(id='violin-boxplot-plot', config={"displayModeBar": False}), width=12),
             ], className="graph-container"),
-            
             dbc.Row([
-                dbc.Col(dcc.Graph(id='correlation-matrix'), width=12),
+                dbc.Col(dcc.Graph(id='correlation-matrix', config={"displayModeBar": False}), width=12),
             ], className="graph-container"),
         ], width=9)
     ])
 ], fluid=True)
 
-# Callbacks for Data Visualization page
+# --- Callbacks ---
 def data_viz_callbacks(app):
+
     @app.callback(
         Output('contour-map', 'figure'),
         Input('column-dropdown', 'value')
     )
     def update_contour_map(selected_column):
-        ''' Mapa de contorno mostrando iteractivamente las abundancias del elemento selecconado en el dropdown '''
-        
-        if df.empty or selected_column is None or 'x_utm' not in df.columns or 'y_utm' not in df.columns:
-          return go.Figure().update_layout(
-        title=dict(
-            text="<b>Interpolated Contour Map: Not enough data.</b>", x=0.5, xanchor="center", y=0.9, yanchor="top", font=dict(size=16, color="black", family="Arial")))
-            
-        # Crear geometría a partir de x_utm y y_utm
-        geometry = gpd.points_from_xy(df.x_utm, df.y_utm)
-    
-        # Crear una grilla regular para interpolación
-        x_min, x_max = geometry.x.min(), geometry.x.max()
-        y_min, y_max = geometry.y.min(), geometry.y.max()
-    
-        # Usar una densidad de grilla apropiada para el dashboard
-        grid_density = 100  # Reducido para mejor rendimiento en la web
-        xi = np.linspace(x_min, x_max, grid_density)
-        yi = np.linspace(y_min, y_max, grid_density)
-        xi, yi = np.meshgrid(xi, yi)
-    
-        # Interpolar los valores del elemento seleccionado
-        values = df[selected_column].values
-        grid_values = griddata((geometry.x, geometry.y), values, (xi, yi), method='cubic')
-    
-        # Filtrar valores negativos (convertirlos a 0)
-        grid_values_pos = np.where(grid_values < 0, 0, grid_values)
-    
-        # Obtener el título personalizado o usar el nombre de columna por defecto
-        title = column_title_map.get(selected_column, f'{selected_column}')
-    
-        # Crear la figura de contorno
+        """
+        Interactive map of the selected element using spatial interpolation (contour plot).
+        """
+        # Check for required columns and data
+        if (df.empty or selected_column is None or
+            'x_utm' not in df.columns or 'y_utm' not in df.columns or
+            df[selected_column].isnull().all()):
+            return go.Figure().update_layout(
+                title=dict(
+                    text="<b>Interpolated Contour Map: Not enough data.</b>",
+                    x=0.5, xanchor="center", y=0.9, yanchor="top",
+                    font=dict(size=16, color="black", family="Arial"))
+            )
+        # Clean data
+        mask = df[['x_utm', 'y_utm', selected_column]].dropna()
+        if mask.empty:
+            return go.Figure().update_layout(
+                title=dict(
+                    text="<b>Interpolated Contour Map: No valid sample locations.</b>",
+                    x=0.5, xanchor="center", y=0.9, yanchor="top",
+                    font=dict(size=16, color="black", family="Arial"))
+            )
+        x = mask['x_utm']
+        y = mask['y_utm']
+        values = mask[selected_column]
+        # Interpolation grid
+        grid_density = 100  # tune for performance
+        try:
+            x_min, x_max = x.min(), x.max()
+            y_min, y_max = y.min(), y.max()
+            if x_min == x_max or y_min == y_max:
+                raise ValueError("Not enough spatial spread for interpolation.")
+            xi = np.linspace(x_min, x_max, grid_density)
+            yi = np.linspace(y_min, y_max, grid_density)
+            xi, yi = np.meshgrid(xi, yi)
+            grid_values = griddata((x, y), values, (xi, yi), method='cubic')
+            # Remove negative interpolations
+            grid_values = np.where(grid_values < 0, 0, grid_values)
+        except Exception:
+            return go.Figure().update_layout(
+                title=dict(
+                    text="<b>Interpolated Contour Map: Interpolation failed.</b>",
+                    x=0.5, xanchor="center", y=0.9, yanchor="top",
+                    font=dict(size=16, color="black", family="Arial"))
+            )
+
+        title = column_title_map.get(selected_column, selected_column)
         fig = go.Figure(data=go.Contour(
-            z=grid_values_pos,
+            z=grid_values,
             x=xi[0, :],
             y=yi[:, 0],
             ncontours=25,
@@ -114,38 +150,46 @@ def data_viz_callbacks(app):
                 titleside='right'
             )
         ))
-    
-        # Actualizar el diseño para quitar los ticks y etiquetas de los ejes
+        # Optionally overlay sample locations (dots)
+        fig.add_trace(go.Scatter(
+            x=x, y=y,
+            mode='markers',
+            marker=dict(color='white', size=4, line=dict(width=0.5, color='black')),
+            name='Samples',
+            hoverinfo='skip',
+            showlegend=False
+        ))
         fig.update_layout(
-            title=dict(text=f"<b>Interpolated Contour Map - {title}</b>", x=0.5, xanchor="center", y=0.9, yanchor="top", font=dict(size=16, color="black", family="Arial")),
+            title=dict(
+                text=f"<b>Interpolated Contour Map - {title}</b>",
+                x=0.5, xanchor="center", y=0.9, yanchor="top",
+                font=dict(size=16, color="black", family="Arial")),
             xaxis=dict(
                 showticklabels=False,
                 showgrid=False,
                 zeroline=False,
                 showline=False,
-                ticks=''
-            ),
+                ticks=''),
             yaxis=dict(
                 showticklabels=False,
                 showgrid=False,
                 zeroline=False,
                 showline=False,
-                ticks=''
-            ),
+                ticks=''),
             height=400,
+            margin=dict(l=40, r=20, t=50, b=30),
         )
-    
         return fig
-    
 
     @app.callback(
         Output('violin-boxplot-plot', 'figure'),
         Input('column-dropdown', 'value')
     )
     def update_violin_boxplot(selected_column):
-        ''' Graficos de Violin y bixplot mostrando la estaditica del elemento seleccionado '''
-
-        if df.empty or selected_column is None:
+        """
+        Violin & Box plot for the selected element.
+        """
+        if df.empty or selected_column is None or df[selected_column].dropna().empty:
             return go.Figure().update_layout(
                 title=dict(
                     text="<b>Distribution Plots: Not enough data.</b>",
@@ -153,111 +197,118 @@ def data_viz_callbacks(app):
                     font=dict(size=16, color="black", family="Arial")
                 )
             )
-
-        fig = make_subplots(rows=1, cols=2, subplot_titles=(f'Violin Plot of {selected_column}', f'Box Plot of {selected_column}'))
-    
-        # Add Violin Plot
-        fig.add_trace(
-            go.Violin(y=df[selected_column], name='Violin', box_visible=True, meanline_visible=True),
-            row=1, col=1
-        )
-    
-        # Add Box Plot
-        fig.add_trace(
-            go.Box(y=df[selected_column], name='Boxplot'),
-            row=1, col=2
-        )
-    
-        # Update layout
-        fig.update_layout(
-            title_text=f"<b>Distribution of {selected_column}</b>",
-            showlegend=False,
-            height=400,
-            title_x=0.5, # Center the title
-            title_y=0.9 # Adjust vertical position if needed
-        )
-    
-        return fig
-
-    # Callback to update the full correlation matrix heatmap
-    @app.callback(
-        Output('correlation-matrix', 'figure'),
-        Input('column-dropdown', 'value')   # Trigger when the Data Visualization tab is selected
-    )
-    def update_full_correlation_matrix(tab_value):
-        ''' Matrix de correlacion de todos los elementos '''
-        
-      if df.empty:
-        return go.Figure().update_layout(
-            title=dict(
-                text="<b>Correlation Matrix of Geochemical Elements</b>",
-                x=0.5, y=0.9, xanchor="center", yanchor="top",
-                font=dict(size=16, color="black", family="Arial")
+        clean_vals = df[selected_column].dropna()
+        # Remove non-finite values
+        clean_vals = clean_vals[np.isfinite(clean_vals)]
+        if clean_vals.empty:
+            return go.Figure().update_layout(
+                title=dict(
+                    text="<b>Distribution Plots: No valid values.</b>",
+                    x=0.5, y=0.9, xanchor="center", yanchor="top",
+                    font=dict(size=16, color="black", family="Arial")
+                )
+            )
+        title = column_title_map.get(selected_column, selected_column)
+        fig = make_subplots(
+            rows=1, cols=2,
+            subplot_titles=(
+                f'Violin Plot of {title}',
+                f'Box Plot of {title}'
             )
         )
-        # Seleccionar columnas numéricas (elementos)
-        elementos = df.select_dtypes(include=['float64', 'int64'])
-    
-        # Eliminar columnas de coordenadas si existen
-        if 'x_utm' in elementos.columns:
-            elementos = elementos.drop(columns=['x_utm'])
-        if 'y_utm' in elementos.columns:
-            elementos = elementos.drop(columns=['y_utm'])
-    
-        # Si el dataset es muy grande, tomar una muestra para hacer el gráfico más rápido
+        fig.add_trace(
+            go.Violin(y=clean_vals, name='Violin', box_visible=True, meanline_visible=True, line_color='royalblue'),
+            row=1, col=1
+        )
+        fig.add_trace(
+            go.Box(y=clean_vals, name='Boxplot', marker_color='indianred'),
+            row=1, col=2
+        )
+        fig.update_layout(
+            title_text=f"<b>Distribution of {title}</b>",
+            showlegend=False,
+            height=400,
+            title_x=0.5,
+            title_y=0.9,
+            margin=dict(l=40, r=20, t=50, b=30),
+        )
+        return fig
+
+    @app.callback(
+        Output('correlation-matrix', 'figure'),
+        Input('column-dropdown', 'value')
+    )
+    def update_full_correlation_matrix(_):
+        """
+        Correlation matrix for all available numeric columns (elements).
+        """
+        # Pick numeric columns and remove spatial coordinates
+        if df.empty:
+            return go.Figure().update_layout(
+                title=dict(
+                    text="<b>Correlation Matrix of Geochemical Elements</b>",
+                    x=0.5, y=0.9, xanchor="center", yanchor="top",
+                    font=dict(size=16, color="black", family="Arial")
+                )
+            )
+        elementos = df.select_dtypes(include=[np.number])
+        for col in ['x_utm', 'y_utm']:
+            if col in elementos.columns:
+                elementos = elementos.drop(columns=[col])
+        # Use only columns with at least some non-null values
+        elementos = elementos.dropna(axis=1, how='all')
+        # Sample if too large
         if len(elementos) > 1000:
             elementos = elementos.sample(n=1000, random_state=42)
-            print("Se tomó una muestra de 1000 puntos para acelerar la visualización de la matriz de correlación")
-    
-    
-        # Calcular matriz de correlación
+        if elementos.shape[1] == 0:
+            return go.Figure().update_layout(
+                title=dict(
+                    text="<b>No numeric geochemical columns available for correlation.</b>",
+                    x=0.5, y=0.9, xanchor="center", yanchor="top",
+                    font=dict(size=16, color="black", family="Arial")
+                )
+            )
         corr_matrix = elementos.corr().round(2)
-         # Redondear a 2 decimales
-    
-        # Crear heatmap de correlación con Plotly
+        # Colorscale, zmin/zmax
         fig = go.Figure(data=go.Heatmap(
             z=corr_matrix.values,
-            x=corr_matrix.columns,
-            y=corr_matrix.index,
+            x=[column_title_map.get(c, c) for c in corr_matrix.columns],
+            y=[column_title_map.get(c, c) for c in corr_matrix.index],
             colorscale='RdBu',
-            zmin=-1,
-            zmax=1,
+            zmin=-1, zmax=1,
             hoverongaps=False,
-            hovertemplate='Correlación entre %{x} y %{y}: %{z:.3f}<extra></extra>',
+            hovertemplate='Correlation between %{x} and %{y}: %{z:.2f}<extra></extra>',
             colorbar=dict(
                 title='<b>Correlation Coefficient</b>',
                 titleside='right'
             )
         ))
-    
-        # Añadir anotaciones (valores de correlación en cada celda)
+        # Annotations
         annotations = []
         for i, row in enumerate(corr_matrix.values):
             for j, value in enumerate(row):
-                # Color del texto basado en el valor de correlación (blanco para valores extremos)
                 font_color = 'white' if abs(value) > 0.7 else 'black'
-    
                 annotations.append(
                     dict(
-                        x=corr_matrix.columns[j],
-                        y=corr_matrix.index[i],
+                        x=column_title_map.get(corr_matrix.columns[j], corr_matrix.columns[j]),
+                        y=column_title_map.get(corr_matrix.index[i], corr_matrix.index[i]),
                         text=f'{value:.2f}',
                         showarrow=False,
                         font=dict(color=font_color, size=10),
                         bgcolor='rgba(255,255,255,0.5)' if abs(value) < 0.3 else 'rgba(0,0,0,0)'
                     )
                 )
-    
         fig.update_layout(
-            title=dict(text='<b>Correlation Matrix of Geochemical Elements</b>', x=0.5, y=0.9, xanchor="center", yanchor="top", font=dict(size=16, color="black", family="Arial")),
+            title=dict(
+                text='<b>Correlation Matrix of Geochemical Elements</b>',
+                x=0.5, y=0.9, xanchor="center", yanchor="top",
+                font=dict(size=16, color="black", family="Arial")),
             xaxis=dict(title='Elements', tickangle=-45),
             yaxis=dict(title='Elements'),
             annotations=annotations,
             height=600,
             margin=dict(l=100, r=50, t=80, b=100),
-            title_x=0.5, # Center the title
-            title_y=0.9 # Adjust vertical position if needed
+            title_x=0.5,
+            title_y=0.9
         )
-    
         return fig
-
