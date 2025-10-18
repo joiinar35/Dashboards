@@ -3,29 +3,41 @@ Data Visualization page and callbacks for interactive geochemical data explorati
 """
 
 import numpy as np
-from dash import dcc, html, Input, Output, callback, no_update
+from dash import dcc, html, Input, Output, callback
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from scipy.interpolate import griddata
 
-# Import shared data and mappings, robust to various execution contexts
+# Import from shared_data module in the same directory
 try:
-    from ..utils.data_loader import df, gdf, column_title_map, numeric_cols
+    from shared_data import df, gdf, column_title_map, numeric_cols
 except ImportError:
-    from utils.data_loader import df, gdf, column_title_map, numeric_cols
+    # Fallback: define the data directly (for standalone testing)
+    import pandas as pd
+    import geopandas as gpd
+    
+    df = pd.DataFrame()
+    gdf = pd.DataFrame()
+    column_title_map = {}
+    numeric_cols = []
 
 # Helper: get element columns for dropdown (robust to missing columns)
 def get_element_columns():
     """Return columns representing elements for dropdown selection."""
+    if df.empty:
+        return []
+    
     if 'ba_ppm' in df.columns and 'zn_ppm' in df.columns:
         start = df.columns.get_loc('ba_ppm')
         end = df.columns.get_loc('zn_ppm') + 1
         return df.columns[start:end]
+    
     # fallback: use numeric_cols if defined, or all numeric columns
-    if 'numeric_cols' in globals() and numeric_cols is not None:
+    if numeric_cols and len(numeric_cols) > 0:
         return numeric_cols
-    return df.select_dtypes(include=[np.number]).columns
+    
+    return df.select_dtypes(include=[np.number]).columns.tolist()
 
 element_columns = get_element_columns()
 dropdown_options = [
@@ -83,21 +95,21 @@ data_viz_layout = dbc.Container([
 
 # --- Callbacks ---
 def data_viz_callbacks(app):
-
+    """Register all callbacks for the data visualization page."""
+    
     @app.callback(
         Output('contour-map', 'figure'),
         Input('column-dropdown', 'value')
     )
-    def update_contour_map(selected_column: str):
-        """
-        Interactive map of the selected element using spatial interpolation (contour plot).
-        """
+    def update_contour_map(selected_column):
+        """Interactive map of the selected element using spatial interpolation (contour plot)."""
         # Check for required columns and data
         if (
             df.empty or
             selected_column is None or
             'x_utm' not in df.columns or
             'y_utm' not in df.columns or
+            selected_column not in df.columns or
             df[selected_column].isnull().all()
         ):
             return go.Figure().update_layout(
@@ -106,6 +118,7 @@ def data_viz_callbacks(app):
                     x=0.5, xanchor="center", y=0.9, yanchor="top",
                     font=dict(size=16, color="black", family="Arial"))
             )
+        
         # Clean data
         mask = df[['x_utm', 'y_utm', selected_column]].dropna()
         if mask.empty:
@@ -115,24 +128,28 @@ def data_viz_callbacks(app):
                     x=0.5, xanchor="center", y=0.9, yanchor="top",
                     font=dict(size=16, color="black", family="Arial"))
             )
+        
         x = mask['x_utm'].values
         y = mask['y_utm'].values
         values = mask[selected_column].values
+        
         # Interpolation grid
-        grid_density = 100  # tune for performance
+        grid_density = 100
         try:
             x_min, x_max = x.min(), x.max()
             y_min, y_max = y.min(), y.max()
             if x_min == x_max or y_min == y_max:
                 raise ValueError("Not enough spatial spread for interpolation.")
+            
             xi = np.linspace(x_min, x_max, grid_density)
             yi = np.linspace(y_min, y_max, grid_density)
             xi, yi = np.meshgrid(xi, yi)
             grid_values = griddata((x, y), values, (xi, yi), method='cubic')
+            
             # Remove negative interpolations
             if grid_values is not None:
                 grid_values = np.where(grid_values < 0, 0, grid_values)
-        except Exception:
+        except Exception as e:
             return go.Figure().update_layout(
                 title=dict(
                     text="<b>Interpolated Contour Map: Interpolation failed.</b>",
@@ -147,17 +164,12 @@ def data_viz_callbacks(app):
             y=yi[:, 0],
             ncontours=25,
             colorscale='Viridis',
-            contours=dict(
-                coloring='fill',
-                showlabels=False
-            ),
+            contours=dict(coloring='fill', showlabels=False),
             hoverinfo='z',
             hovertemplate='<b>%{z:.1f} ppm</b><extra></extra>',
-            colorbar=dict(
-                title='<b>' + title + '</b>',
-                titleside='right'
-            )
+            colorbar=dict(title=f'<b>{title}</b>', titleside='right')
         ))
+        
         # Overlay sample locations (dots)
         fig.add_trace(go.Scatter(
             x=x, y=y,
@@ -167,23 +179,18 @@ def data_viz_callbacks(app):
             hoverinfo='skip',
             showlegend=False
         ))
+        
         fig.update_layout(
             title=dict(
                 text=f"<b>Interpolated Contour Map - {title}</b>",
                 x=0.5, xanchor="center", y=0.9, yanchor="top",
                 font=dict(size=16, color="black", family="Arial")),
             xaxis=dict(
-                showticklabels=False,
-                showgrid=False,
-                zeroline=False,
-                showline=False,
-                ticks=''),
+                showticklabels=False, showgrid=False, zeroline=False, 
+                showline=False, ticks=''),
             yaxis=dict(
-                showticklabels=False,
-                showgrid=False,
-                zeroline=False,
-                showline=False,
-                ticks=''),
+                showticklabels=False, showgrid=False, zeroline=False, 
+                showline=False, ticks=''),
             height=400,
             margin=dict(l=40, r=20, t=50, b=30),
         )
@@ -193,15 +200,10 @@ def data_viz_callbacks(app):
         Output('violin-boxplot-plot', 'figure'),
         Input('column-dropdown', 'value')
     )
-    def update_violin_boxplot(selected_column: str):
-        """
-        Violin & Box plot for the selected element.
-        """
-        if (
-            df.empty or
-            selected_column is None or
-            df[selected_column].dropna().empty
-        ):
+    def update_violin_boxplot(selected_column):
+        """Violin & Box plot for the selected element."""
+        if (df.empty or selected_column is None or selected_column not in df.columns or
+            df[selected_column].dropna().empty):
             return go.Figure().update_layout(
                 title=dict(
                     text="<b>Distribution Plots: Not enough data.</b>",
@@ -209,8 +211,10 @@ def data_viz_callbacks(app):
                     font=dict(size=16, color="black", family="Arial")
                 )
             )
+        
         clean_vals = df[selected_column].dropna()
         clean_vals = clean_vals[np.isfinite(clean_vals)]
+        
         if clean_vals.empty:
             return go.Figure().update_layout(
                 title=dict(
@@ -219,6 +223,7 @@ def data_viz_callbacks(app):
                     font=dict(size=16, color="black", family="Arial")
                 )
             )
+        
         title = column_title_map.get(selected_column, selected_column)
         fig = make_subplots(
             rows=1, cols=2,
@@ -227,14 +232,17 @@ def data_viz_callbacks(app):
                 f'Box Plot of {title}'
             )
         )
+        
         fig.add_trace(
-            go.Violin(y=clean_vals, name='Violin', box_visible=True, meanline_visible=True, line_color='royalblue'),
+            go.Violin(y=clean_vals, name='Violin', box_visible=True, 
+                     meanline_visible=True, line_color='royalblue'),
             row=1, col=1
         )
         fig.add_trace(
             go.Box(y=clean_vals, name='Boxplot', marker_color='indianred'),
             row=1, col=2
         )
+        
         fig.update_layout(
             title_text=f"<b>Distribution of {title}</b>",
             showlegend=False,
@@ -250,9 +258,7 @@ def data_viz_callbacks(app):
         Input('column-dropdown', 'value')
     )
     def update_full_correlation_matrix(_):
-        """
-        Correlation matrix for all available numeric columns (elements).
-        """
+        """Correlation matrix for all available numeric columns (elements)."""
         if df.empty:
             return go.Figure().update_layout(
                 title=dict(
@@ -261,15 +267,19 @@ def data_viz_callbacks(app):
                     font=dict(size=16, color="black", family="Arial")
                 )
             )
+        
         elementos = df.select_dtypes(include=[np.number])
         for col in ['x_utm', 'y_utm']:
             if col in elementos.columns:
                 elementos = elementos.drop(columns=[col])
+        
         # Use only columns with at least some non-null values
         elementos = elementos.dropna(axis=1, how='all')
+        
         # Sample rows if too large (performance)
         if elementos.shape[0] > 1000:
             elementos = elementos.sample(n=1000, random_state=42)
+        
         if elementos.shape[1] == 0:
             return go.Figure().update_layout(
                 title=dict(
@@ -278,6 +288,7 @@ def data_viz_callbacks(app):
                     font=dict(size=16, color="black", family="Arial")
                 )
             )
+        
         corr_matrix = elementos.corr().round(2)
         fig = go.Figure(data=go.Heatmap(
             z=corr_matrix.values,
@@ -287,11 +298,9 @@ def data_viz_callbacks(app):
             zmin=-1, zmax=1,
             hoverongaps=False,
             hovertemplate='Correlation between %{x} and %{y}: %{z:.2f}<extra></extra>',
-            colorbar=dict(
-                title='<b>Correlation Coefficient</b>',
-                titleside='right'
-            )
+            colorbar=dict(title='<b>Correlation Coefficient</b>', titleside='right')
         ))
+        
         # Annotations: show values on the heatmap
         annotations = []
         for i, row in enumerate(corr_matrix.values):
@@ -307,6 +316,7 @@ def data_viz_callbacks(app):
                         bgcolor='rgba(255,255,255,0.5)' if abs(value) < 0.3 else 'rgba(0,0,0,0)'
                     )
                 )
+        
         fig.update_layout(
             title=dict(
                 text='<b>Correlation Matrix of Geochemical Elements</b>',

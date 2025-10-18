@@ -1,17 +1,31 @@
+"""
+PCA Analysis page and callbacks for principal component analysis and clustering.
+"""
+
 from dash import dcc, html, Input, Output
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import plotly.express as px
-from utils.data_loader import data_for_analysis, scaled_data_df, df, gdf
-from sklearn.decomposition import PCA
-from sklearn.cluster import KMeans
 import numpy as np
 from scipy.interpolate import griddata
 import pandas as pd
 import geopandas as gpd
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
 
-# Helper function for safe fetching of current data (if using updated globals, otherwise just wrap for clarity)
+# Import from shared_data module
+try:
+    from shared_data import data_for_analysis, scaled_data_df, df, gdf
+except ImportError:
+    # Fallback: define empty data structures
+    data_for_analysis = pd.DataFrame()
+    scaled_data_df = pd.DataFrame()
+    df = pd.DataFrame()
+    gdf = pd.DataFrame()
+
+# Helper function for safe data access
 def get_data():
+    """Safely return data structures with fallbacks."""
     return data_for_analysis, scaled_data_df, df, gdf
 
 # Layout for PCA Analysis page
@@ -73,7 +87,7 @@ pca_analysis_layout = dbc.Container([
             dbc.Row([
                 dbc.Col(dcc.Graph(id='cluster-map'), width=12, className="graph-container"),
             ]),
-            # Optionally: Add a location to show error messages to the user
+            # Optional: Add a location to show error messages to the user
             dbc.Row([
                 dbc.Col(html.Div(id='pca-error-message', className="text-danger"), width=12)
             ])
@@ -82,6 +96,7 @@ pca_analysis_layout = dbc.Container([
 ], fluid=True)
 
 def empty_figure(msg):
+    """Return an empty figure with a message."""
     return go.Figure().update_layout(
         title=dict(
             text=f"<b>{msg}</b>",
@@ -90,12 +105,13 @@ def empty_figure(msg):
     )
 
 def pca_analysis_callbacks(app):
+    """Register all callbacks for the PCA analysis page."""
+    
     @app.callback(
         [
             Output('pca-scatter-plot', 'figure'),
             Output('pca-scree-plot', 'figure'),
             Output('pca-loadings-heatmap', 'figure'),
-            # Optional: show error message in UI
             Output('pca-error-message', 'children'),
         ],
         [
@@ -104,7 +120,8 @@ def pca_analysis_callbacks(app):
         ]
     )
     def update_pca_plots(tab_value, n_components):
-        # Defensive fetch; ensures data is always up to date
+        """Update PCA plots based on selected number of components."""
+        # Get current data
         data_for_analysis, scaled_data_df, df, gdf = get_data()
         error_msg = ""
 
@@ -121,7 +138,7 @@ def pca_analysis_callbacks(app):
                     "No data available for PCA analysis."]
 
         # Validate n_components
-        max_components = min(scaled_data_df.shape)
+        max_components = min(scaled_data_df.shape[0], scaled_data_df.shape[1])
         if n_components is None or not (1 <= n_components <= max_components):
             error_msg = f"Please select between 1 and {max_components} components."
             return [empty_figure(error_msg)] * 3 + [error_msg]
@@ -132,12 +149,17 @@ def pca_analysis_callbacks(app):
             return [empty_figure(error_msg)] * 3 + [error_msg]
 
         try:
+            # Perform PCA
             pca = PCA(n_components=n_components)
             pca_components = pca.fit_transform(scaled_data_df)
             pca_explained_variance = pca.explained_variance_ratio_
             pca_loadings = pca.components_.T * np.sqrt(pca.explained_variance_)
 
-            pca_df = pd.DataFrame(pca_components, columns=[f'PC{i+1}' for i in range(n_components)])
+            # Create PCA results dataframe
+            pca_df = pd.DataFrame(
+                pca_components, 
+                columns=[f'PC{i+1}' for i in range(n_components)]
+            )
             pca_df = pca_df.set_index(scaled_data_df.index)
 
             # Scatter Plot
@@ -148,10 +170,10 @@ def pca_analysis_callbacks(app):
                 x=x_col,
                 y=y_col,
                 title='PCA: PC1 vs PC2' if n_components >= 2 else 'PCA: PC1',
-                hover_data=pca_df.columns  # All PC values on hover
+                hover_data=pca_df.columns
             )
             scatter_fig.update_layout(
-                margin={"r":0,"t":40,"l":0,"b":0},
+                margin={"r": 0, "t": 40, "l": 0, "b": 0},
                 title=dict(
                     text='<b>PCA: PC1 vs PC2</b>' if n_components >= 2 else '<b>PCA: PC1</b>',
                     x=0.5, y=0.9, xanchor="center", yanchor="top",
@@ -161,6 +183,7 @@ def pca_analysis_callbacks(app):
             # Scree Plot
             explained_variance_subset = pca_explained_variance[:n_components]
             cumulative_variance_subset = np.cumsum(explained_variance_subset)
+            
             scree_fig = go.Figure()
             scree_fig.add_trace(go.Bar(
                 x=[f'PC{i+1}' for i in range(n_components)],
@@ -181,7 +204,7 @@ def pca_analysis_callbacks(app):
                     font=dict(size=16, color="black", family="Arial")),
                 xaxis_title='Principal Component',
                 yaxis_title='Explained Variance Ratio',
-                margin={"r":0,"t":40,"l":0,"b":0},
+                margin={"r": 0, "t": 40, "l": 0, "b": 0},
                 legend=dict(
                     x=0.95, y=0.95,
                     xanchor='right', yanchor='top',
@@ -195,9 +218,11 @@ def pca_analysis_callbacks(app):
                 index=scaled_data_df.columns,
                 columns=[f'PC{i+1}' for i in range(pca_loadings.shape[1])]
             )
-            # Normalize loadings to [-1, 1] for consistent heatmap color scaling
+            
+            # Normalize loadings for consistent heatmap color scaling
             max_abs_loading = np.abs(loadings_df.values).max()
             zmin, zmax = (-1, 1) if max_abs_loading <= 1 else (-max_abs_loading, max_abs_loading)
+            
             heatmap_fig = go.Figure(data=go.Heatmap(
                 z=loadings_df.values,
                 x=loadings_df.columns,
@@ -205,10 +230,7 @@ def pca_analysis_callbacks(app):
                 colorscale='RdBu',
                 zmin=zmin,
                 zmax=zmax,
-                colorbar=dict(
-                    title='<b>Loading Value</b>',
-                    titleside='right'
-                )
+                colorbar=dict(title='<b>Loading Value</b>', titleside='right')
             ))
             heatmap_fig.update_layout(
                 title=dict(
@@ -217,13 +239,13 @@ def pca_analysis_callbacks(app):
                     font=dict(size=16, color="black", family="Arial")),
                 xaxis_title='Principal Component',
                 yaxis_title='Variable',
-                margin={"r":0,"t":40,"l":0,"b":0}
+                margin={"r": 0, "t": 40, "l": 0, "b": 0}
             )
 
             return scatter_fig, scree_fig, heatmap_fig, ""
 
         except Exception as e:
-            error_msg = f"Error during PCA analysis: {e}"
+            error_msg = f"Error during PCA analysis: {str(e)}"
             return [empty_figure(error_msg)] * 3 + [error_msg]
 
     @app.callback(
@@ -235,11 +257,13 @@ def pca_analysis_callbacks(app):
         ]
     )
     def update_cluster_map(tab_value, n_components, n_clusters):
+        """Update cluster map based on PCA components and cluster count."""
         data_for_analysis, scaled_data_df, df, gdf = get_data()
 
         if tab_value != 'tab-pca':
             return empty_figure("Cluster Map: Not selected.")
 
+        # Validate inputs and data availability
         if (scaled_data_df is None or scaled_data_df.empty or
             gdf is None or gdf.empty or
             n_clusters is None or n_clusters < 2 or
@@ -248,40 +272,43 @@ def pca_analysis_callbacks(app):
             return empty_figure("Cluster Map: Not enough data or invalid number of clusters.")
 
         # Check n_components validity
-        max_components = min(scaled_data_df.shape)
+        max_components = min(scaled_data_df.shape[0], scaled_data_df.shape[1])
         if n_components is None or not (1 <= n_components <= max_components):
             return empty_figure(f"Cluster Map: Please select between 1 and {max_components} components.")
 
-        # Defensive: check for NaN
+        # Check for NaN values
         if scaled_data_df.isnull().values.any():
             return empty_figure("Cluster Map: Input data contains NaN values.")
 
-        # Defensive: check enough samples for KMeans
+        # Check enough samples for KMeans
         if scaled_data_df.shape[0] < n_clusters:
             return empty_figure(
                 f"Cluster Map: Not enough samples ({scaled_data_df.shape[0]}) for {n_clusters} clusters."
             )
 
         try:
+            # Perform PCA
             pca = PCA(n_components=n_components)
             pca_components = pca.fit_transform(scaled_data_df)
 
+            # Perform KMeans clustering
             kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
             clusters = kmeans.fit_predict(pca_components)
         except Exception as e:
-            return empty_figure(f"Cluster Map: Error during PCA or clustering - {e}")
+            return empty_figure(f"Cluster Map: Error during PCA or clustering - {str(e)}")
 
-        # Align indices safely
+        # Create cluster dataframe with coordinates
         try:
+            # Safely align indices
             cluster_df = pd.DataFrame({
                 'cluster': clusters,
-                'x_utm': df.reindex(scaled_data_df.index)['x_utm'].values,
-                'y_utm': df.reindex(scaled_data_df.index)['y_utm'].values
+                'x_utm': df.loc[scaled_data_df.index, 'x_utm'].values,
+                'y_utm': df.loc[scaled_data_df.index, 'y_utm'].values
             })
         except Exception as e:
-            return empty_figure(f"Cluster Map: Error aligning indices/coordinates for clusters - {e}")
+            return empty_figure(f"Cluster Map: Error aligning indices/coordinates for clusters - {str(e)}")
 
-        # Create GeoDataFrame
+        # Create GeoDataFrame for spatial operations
         try:
             gdf_clusters = gpd.GeoDataFrame(
                 cluster_df,
@@ -289,17 +316,18 @@ def pca_analysis_callbacks(app):
                 crs="EPSG:32721"  # UTM zone 21S
             )
         except Exception as e:
-            return empty_figure(f"Cluster Map: Error creating GeoDataFrame - {e}")
+            return empty_figure(f"Cluster Map: Error creating GeoDataFrame - {str(e)}")
 
-        # Create an interpolated map of clusters
+        # Create interpolated cluster map
         try:
             points = np.array([gdf_clusters.geometry.x, gdf_clusters.geometry.y]).T
             values = gdf_clusters['cluster'].values
 
-            # Create a regular grid for interpolation (adjust density for performance)
+            # Create interpolation grid
             grid_density = 70  # Reduced for better performance
             x_min, x_max = points[:, 0].min(), points[:, 0].max()
             y_min, y_max = points[:, 1].min(), points[:, 1].max()
+            
             if x_max == x_min or y_max == y_min:
                 return empty_figure("Cluster Map: Not enough unique geographic coordinates for interpolation.")
 
@@ -307,12 +335,14 @@ def pca_analysis_callbacks(app):
             yi = np.linspace(y_min, y_max, grid_density)
             xi, yi = np.meshgrid(xi, yi)
 
-            # Interpolation (using nearest neighbor for discrete clusters)
+            # Check for sufficient unique coordinates
             if len(np.unique(points[:, 0])) < 2 or len(np.unique(points[:, 1])) < 2:
                 return empty_figure("Cluster Map: Not enough unique geographic coordinates for interpolation.")
 
+            # Perform interpolation (nearest neighbor for discrete clusters)
             grid_values = griddata(points, values, (xi, yi), method='nearest')
 
+            # Create contour plot
             fig = go.Figure(data=go.Contour(
                 z=grid_values,
                 x=xi[0, :],
@@ -339,11 +369,18 @@ def pca_analysis_callbacks(app):
                     text=f'<b>Interpolated Cluster Map (k={n_clusters})</b>',
                     x=0.5, y=0.9, xanchor="center", yanchor="top",
                     font=dict(size=16, color="black", family="Arial")),
-                xaxis=dict(showticklabels=False, showgrid=False, zeroline=False, showline=False, ticks=''),
-                yaxis=dict(showticklabels=False, showgrid=False, zeroline=False, showline=False, ticks=''),
+                xaxis=dict(
+                    showticklabels=False, showgrid=False, 
+                    zeroline=False, showline=False, ticks=''
+                ),
+                yaxis=dict(
+                    showticklabels=False, showgrid=False, 
+                    zeroline=False, showline=False, ticks=''
+                ),
                 height=600,
             )
-        except Exception as e:
-            fig = empty_figure(f"Cluster Map: Error during interpolation - {e}")
+            
+            return fig
 
-        return fig
+        except Exception as e:
+            return empty_figure(f"Cluster Map: Error during interpolation - {str(e)}")

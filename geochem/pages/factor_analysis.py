@@ -1,32 +1,50 @@
+"""
+Factor Analysis page and callbacks for identifying underlying factors in geochemical data.
+"""
+
 import pandas as pd
 import geopandas as gpd
 from dash import dcc, html, Input, Output
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
-from utils.data_loader import data_for_analysis, df
-from factor_analyzer import FactorAnalyzer
 import numpy as np
 from scipy.interpolate import griddata
 import logging
+from factor_analyzer import FactorAnalyzer
+
+# Import from shared_data module
+try:
+    from shared_data import data_for_analysis, df, column_title_map
+except ImportError:
+    # Fallback: define empty data structures
+    data_for_analysis = pd.DataFrame()
+    df = pd.DataFrame()
+    column_title_map = {}
 
 # Calculate initial number of factors for dropdown
 if not data_for_analysis.empty:
-    fa_initial = FactorAnalyzer(rotation=None, n_factors=data_for_analysis.shape[1])
-    fa_initial.fit(data_for_analysis)
-    eigenvalues_fa_initial, _ = fa_initial.get_eigenvalues()
-    n_factors_initial = sum(eigenvalues_fa_initial > 1) if eigenvalues_fa_initial is not None else 1
+    try:
+        fa_initial = FactorAnalyzer(rotation=None, n_factors=data_for_analysis.shape[1])
+        fa_initial.fit(data_for_analysis)
+        eigenvalues_fa_initial, _ = fa_initial.get_eigenvalues()
+        n_factors_initial = sum(eigenvalues_fa_initial > 1) if eigenvalues_fa_initial is not None else 1
+    except Exception as e:
+        logging.warning(f"Error calculating initial factors: {e}")
+        n_factors_initial = 1
 else:
     n_factors_initial = 1
 
 def get_dropdown_options():
+    """Generate dropdown options based on available data."""
+    if data_for_analysis.empty:
+        return [{'label': '1', 'value': 1}]
+    
     n_cols = len(data_for_analysis.columns)
     max_n = max(1, n_cols)
     return [{'label': str(i), 'value': i} for i in range(1, max_n + 1)]
 
 # Layout for Factor Analysis page
 factor_analysis_layout = dbc.Container([
-    dcc.Store(id='df-store', data=df.to_dict('records')),
-    dcc.Store(id='data-for-analysis-store', data=data_for_analysis.to_dict('records')),
     dbc.Row([
         dbc.Col(html.Div([
             html.P("Factor Analysis helps identify underlying factors that explain the relationships between variables."),
@@ -54,7 +72,8 @@ factor_analysis_layout = dbc.Container([
                 id='n-factors-dropdown',
                 options=get_dropdown_options(),
                 value=n_factors_initial,
-                clearable=False
+                clearable=False,
+                disabled=data_for_analysis.empty
             ),
             html.Div(id='fa-controls-placeholder')
         ], width=3, className="sidebar"),
@@ -76,6 +95,7 @@ factor_analysis_layout = dbc.Container([
 ], fluid=True)
 
 def make_empty_figure(title):
+    """Create an empty figure with a message."""
     fig = go.Figure()
     fig.update_layout(
         title=dict(
@@ -84,11 +104,12 @@ def make_empty_figure(title):
             xanchor="center", yanchor="top",
             font=dict(size=16, color="black", family="Arial")
         ),
-        margin={"r":0, "t":40, "l":0, "b":0}
+        margin={"r": 0, "t": 40, "l": 0, "b": 0}
     )
     return fig
 
 def make_scree_plot(eigenvalues):
+    """Create scree plot for factor analysis eigenvalues."""
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=[f'{i+1}' for i in range(len(eigenvalues))],
@@ -96,8 +117,11 @@ def make_scree_plot(eigenvalues):
         mode='lines+markers',
         name='Eigenvalues'
     ))
-    fig.add_shape(type="line", x0=-0.5, y0=1, x1=len(eigenvalues)-0.5, y1=1,
-                  line=dict(color="Red", width=2, dash="dash"))
+    fig.add_shape(
+        type="line", 
+        x0=-0.5, y0=1, x1=len(eigenvalues)-0.5, y1=1,
+        line=dict(color="Red", width=2, dash="dash")
+    )
     fig.update_layout(
         title=dict(
             text='<b>Factor Analysis Scree Plot (Eigenvalues)</b>',
@@ -107,11 +131,12 @@ def make_scree_plot(eigenvalues):
         xaxis_title='Factor Number',
         yaxis_title='Eigenvalue',
         showlegend=False,
-        margin={"r":0,"t":40,"l":0,"b":0}
+        margin={"r": 0, "t": 40, "l": 0, "b": 0}
     )
     return fig
 
 def make_variance_plot(fa_variance, valid_n_factors):
+    """Create variance explained plot for factor analysis."""
     fig = go.Figure()
     fig.add_trace(go.Bar(
         x=[f'Factor {i+1}' for i in range(valid_n_factors)],
@@ -133,7 +158,7 @@ def make_variance_plot(fa_variance, valid_n_factors):
         xaxis_title='Factor Number',
         yaxis_title='Proportion of Variance',
         legend_title='Variance Type',
-        margin={"r":0,"t":40,"l":0,"b":0},
+        margin={"r": 0, "t": 40, "l": 0, "b": 0},
         legend=dict(
             x=0.95, y=0.95, xanchor='right', yanchor='top',
             bgcolor='rgba(255, 255, 255, 0.5)'
@@ -142,6 +167,7 @@ def make_variance_plot(fa_variance, valid_n_factors):
     return fig
 
 def make_loadings_heatmap(fa_loadings, data_for_analysis, valid_n_factors):
+    """Create heatmap of factor loadings."""
     loadings_df_fa = pd.DataFrame(
         fa_loadings,
         index=data_for_analysis.columns,
@@ -154,10 +180,8 @@ def make_loadings_heatmap(fa_loadings, data_for_analysis, valid_n_factors):
         colorscale='RdBu',
         zmin=-1,
         zmax=1,
-        colorbar=dict(
-            title='<b>Loading Value</b>',
-            titleside='right'
-        )))
+        colorbar=dict(title='<b>Loading Value</b>', titleside='right')
+    ))
     fig.update_layout(
         title=dict(
             text='<b>Factor Analysis Loadings Heatmap</b>',
@@ -166,34 +190,37 @@ def make_loadings_heatmap(fa_loadings, data_for_analysis, valid_n_factors):
         ),
         xaxis_title='Factor',
         yaxis_title='Variable',
-        margin={"r":0,"t":40,"l":0,"b":0}
+        margin={"r": 0, "t": 40, "l": 0, "b": 0}
     )
     return fig
 
 def make_factor_score_map(gdf_fa_scores, factor_score_col, i):
+    """Create interpolated map for factor scores."""
     points = np.array([gdf_fa_scores.geometry.x, gdf_fa_scores.geometry.y]).T
     values = gdf_fa_scores[factor_score_col].values
-    # Interpolation: check if enough points (at least 4 and both x/y vary)
+    
+    # Check if enough points for interpolation
     if len(points) < 4 or len(np.unique(points[:, 0])) < 2 or len(np.unique(points[:, 1])) < 2:
         return make_empty_figure(f'<b>Factor {i+1} Score Map: Not enough data for interpolation.</b>')
+    
     try:
         grid_density = 100
         x_min, x_max = points[:, 0].min(), points[:, 0].max()
         y_min, y_max = points[:, 1].min(), points[:, 1].max()
+        
         xi = np.linspace(x_min, x_max, grid_density)
         yi = np.linspace(y_min, y_max, grid_density)
         xi, yi = np.meshgrid(xi, yi)
+        
         grid_values = griddata(points, values, (xi, yi), method='cubic')
+        
         fig = go.Figure(data=go.Contour(
             z=grid_values,
             x=xi[0, :],
             y=yi[:, 0],
             ncontours=25,
             colorscale='RdBu',
-            contours=dict(
-                coloring='fill',
-                showlabels=False
-            ),
+            contours=dict(coloring='fill', showlabels=False),
             hoverinfo='z',
             hovertemplate='<b>%{z:.2f}</b><extra></extra>',
             colorbar=dict(
@@ -201,22 +228,32 @@ def make_factor_score_map(gdf_fa_scores, factor_score_col, i):
                 titleside='right'
             )
         ))
+        
         fig.update_layout(
             title=dict(
                 text=f'<b>Interpolated Factor {i+1} Score Map</b>',
                 x=0.5, y=0.9, xanchor="center", yanchor="top",
                 font=dict(size=16, color="black", family="Arial")
             ),
-            xaxis=dict(showticklabels=False, showgrid=False, zeroline=False, showline=False, ticks=''),
-            yaxis=dict(showticklabels=False, showgrid=False, zeroline=False, showline=False, ticks=''),
+            xaxis=dict(
+                showticklabels=False, showgrid=False, 
+                zeroline=False, showline=False, ticks=''
+            ),
+            yaxis=dict(
+                showticklabels=False, showgrid=False, 
+                zeroline=False, showline=False, ticks=''
+            ),
             height=400
         )
         return fig
+        
     except Exception as e:
         logging.error(f"Error during interpolation for Factor {i+1}: {e}")
         return make_empty_figure(f'<b>Factor {i+1} Score Map: Error during interpolation.</b>')
 
 def factor_analysis_callbacks(app):
+    """Register all callbacks for the factor analysis page."""
+    
     @app.callback(
         [
             Output('fa-scree-plot', 'figure'),
@@ -226,106 +263,109 @@ def factor_analysis_callbacks(app):
         ],
         [
             Input('tabs', 'value'),
-            Input('df-store', 'data'),
-            Input('data-for-analysis-store', 'data'),
             Input('n-factors-dropdown', 'value')
         ]
     )
-    def update_fa_plots(tab_value, df_data, data_for_analysis_data, n_factors):
+    def update_fa_plots(tab_value, n_factors):
         """Update Factor Analysis plots and maps based on selected tab and number of factors."""
-        df_local = pd.DataFrame(df_data)
-        data_for_analysis_local = pd.DataFrame(data_for_analysis_data)
-
+        # Initialize default return values
         scree_fig_fa = make_empty_figure("<b>Factor Analysis Scree Plot: Not enough data.</b>")
         variance_fig_fa = make_empty_figure("<b>Factor Analysis Explained Variance: Not enough data.</b>")
         heatmap_fig_fa = make_empty_figure("<b>Factor Analysis Loadings Heatmap: Not enough data.</b>")
         map_rows = [dbc.Row(dbc.Col(html.Div("Not enough data for Factor Analysis maps."), width=12))]
 
-        if tab_value != 'tab-fa' or data_for_analysis_local.empty:
+        # Check if correct tab and data exists
+        if tab_value != 'tab-fa' or data_for_analysis.empty:
             return scree_fig_fa, variance_fig_fa, heatmap_fig_fa, map_rows
 
-        valid_n_factors = min(n_factors if n_factors is not None else 1, len(data_for_analysis_local.columns) if not data_for_analysis_local.empty else 0)
+        # Validate number of factors
+        valid_n_factors = min(
+            n_factors if n_factors is not None else 1, 
+            len(data_for_analysis.columns) if not data_for_analysis.empty else 0
+        )
+        
         if valid_n_factors < 1:
-            scree_fig_fa = make_empty_figure("<b>Factor Analysis Scree Plot: Not enough data or factors selected.</b>")
-            variance_fig_fa = make_empty_figure("<b>Factor Analysis Explained Variance: Not enough data or factors selected.</b>")
-            heatmap_fig_fa = make_empty_figure("<b>Factor Analysis Loadings Heatmap: Not enough data or factors selected.</b>")
+            error_msg = "Not enough data or factors selected."
+            scree_fig_fa = make_empty_figure(f"<b>Factor Analysis Scree Plot: {error_msg}</b>")
+            variance_fig_fa = make_empty_figure(f"<b>Factor Analysis Explained Variance: {error_msg}</b>")
+            heatmap_fig_fa = make_empty_figure(f"<b>Factor Analysis Loadings Heatmap: {error_msg}</b>")
             map_rows = [dbc.Row(dbc.Col(html.Div("Not enough data or factors selected for Factor Analysis maps."), width=12))]
             return scree_fig_fa, variance_fig_fa, heatmap_fig_fa, map_rows
 
         try:
+            # Perform Factor Analysis
             fa = FactorAnalyzer(rotation='varimax', n_factors=valid_n_factors)
-            fa.fit(data_for_analysis_local)
+            fa.fit(data_for_analysis)
             eigenvalues_fa, _ = fa.get_eigenvalues()
             fa_loadings = fa.loadings_
             fa_variance = fa.get_factor_variance()
-            fa_scores = fa.transform(data_for_analysis_local)
-            fa_scores_df = pd.DataFrame(fa_scores, columns=[f'Factor_{i+1}_Score' for i in range(fa_scores.shape[1])])
-            fa_scores_df.index = data_for_analysis_local.index
+            fa_scores = fa.transform(data_for_analysis)
+            
+            # Create factor scores dataframe
+            fa_scores_df = pd.DataFrame(
+                fa_scores, 
+                columns=[f'Factor_{i+1}_Score' for i in range(fa_scores.shape[1])]
+            )
+            fa_scores_df.index = data_for_analysis.index
+            
         except Exception as e:
-            logging.error(f"Error during Factor Analysis fit or transformation: {e}")
-            scree_fig_fa = make_empty_figure(f"<b>Factor Analysis Scree Plot: Error ({e}).</b>")
-            variance_fig_fa = make_empty_figure(f"<b>Factor Analysis Explained Variance: Error ({e}).</b>")
-            heatmap_fig_fa = make_empty_figure(f"<b>Factor Analysis Loadings Heatmap: Error ({e}).</b>")
-            map_rows = [dbc.Row(dbc.Col(html.Div(f"Error during Factor Analysis: {e}"), width=12))]
+            error_msg = f"Error during Factor Analysis: {str(e)}"
+            logging.error(error_msg)
+            scree_fig_fa = make_empty_figure(f"<b>Factor Analysis Scree Plot: {error_msg}</b>")
+            variance_fig_fa = make_empty_figure(f"<b>Factor Analysis Explained Variance: {error_msg}</b>")
+            heatmap_fig_fa = make_empty_figure(f"<b>Factor Analysis Loadings Heatmap: {error_msg}</b>")
+            map_rows = [dbc.Row(dbc.Col(html.Div(error_msg), width=12))]
             return scree_fig_fa, variance_fig_fa, heatmap_fig_fa, map_rows
 
-        # Scree plot
+        # Create Scree Plot
         if eigenvalues_fa is not None and len(eigenvalues_fa) > 0:
             scree_fig_fa = make_scree_plot(eigenvalues_fa)
         else:
             scree_fig_fa = make_empty_figure("<b>Factor Analysis Scree Plot: No eigenvalues calculated.</b>")
 
-        # Variance plot
-        if fa_variance is not None and len(fa_variance) > 2 and len(fa_variance[1]) >= valid_n_factors and len(fa_variance[2]) >= valid_n_factors:
+        # Create Variance Plot
+        if (fa_variance is not None and len(fa_variance) > 2 and 
+            len(fa_variance[1]) >= valid_n_factors and len(fa_variance[2]) >= valid_n_factors):
             variance_fig_fa = make_variance_plot(fa_variance, valid_n_factors)
         else:
-            variance_fig_fa = make_empty_figure("<b>Factor Analysis Explained Variance: Variance data not available or incomplete.</b>")
+            variance_fig_fa = make_empty_figure("<b>Factor Analysis Explained Variance: Variance data not available.</b>")
 
-        # Loadings heatmap
-        if (
-            fa_loadings is not None and not data_for_analysis_local.empty and
-            fa_loadings.shape[0] == len(data_for_analysis_local.columns) and
-            fa_loadings.shape[1] == valid_n_factors
-        ):
-            heatmap_fig_fa = make_loadings_heatmap(fa_loadings, data_for_analysis_local, valid_n_factors)
+        # Create Loadings Heatmap
+        if (fa_loadings is not None and not data_for_analysis.empty and
+            fa_loadings.shape[0] == len(data_for_analysis.columns) and
+            fa_loadings.shape[1] == valid_n_factors):
+            heatmap_fig_fa = make_loadings_heatmap(fa_loadings, data_for_analysis, valid_n_factors)
         else:
-            heatmap_fig_fa = make_empty_figure("<b>Factor Analysis Loadings Heatmap: Loadings data not available or shape mismatch.</b>")
+            heatmap_fig_fa = make_empty_figure("<b>Factor Analysis Loadings Heatmap: Loadings data not available.</b>")
 
         # Generate Factor Score Maps
         map_rows = []
-        if (
-            df_local.empty or 'x_utm' not in df_local.columns or 'y_utm' not in df_local.columns or
-            data_for_analysis_local.empty or fa_scores_df.empty
-        ):
-            logging.error("Not enough data or missing coordinates in original df or fa_scores_df for factor score maps.")
+        if (df.empty or 'x_utm' not in df.columns or 'y_utm' not in df.columns or
+            data_for_analysis.empty or fa_scores_df.empty):
+            logging.error("Not enough data or missing coordinates for factor score maps.")
             map_rows = [dbc.Row(dbc.Col(html.Div("Not enough data or missing coordinates for factor score maps."), width=12))]
             return scree_fig_fa, variance_fig_fa, heatmap_fig_fa, map_rows
 
-        # Add x_utm and y_utm to the scores dataframe using indices from data_for_analysis
-        fa_scores_df_with_coords = fa_scores_df.copy()
-        if len(data_for_analysis_local) == len(fa_scores_df_with_coords):
-            try:
-                # Index alignment: match indices for coordinate assignment
-                fa_scores_df_with_coords['x_utm'] = df_local.loc[data_for_analysis_local.index, 'x_utm'].values
-                fa_scores_df_with_coords['y_utm'] = df_local.loc[data_for_analysis_local.index, 'y_utm'].values
-            except Exception as e:
-                logging.error(f"Error adding coordinates to factor scores dataframe: {e}")
-                map_rows = [dbc.Row(dbc.Col(html.Div(f"Error adding coordinates for factor score maps: {e}"), width=12))]
-                return scree_fig_fa, variance_fig_fa, heatmap_fig_fa, map_rows
-        else:
-            logging.error("Index mismatch when adding coordinates to factor scores.")
-            map_rows = [dbc.Row(dbc.Col(html.Div("Index mismatch when adding coordinates for factor score maps."), width=12))]
-            return scree_fig_fa, variance_fig_fa, heatmap_fig_fa, map_rows
-
         try:
+            # Add coordinates to factor scores
+            fa_scores_df_with_coords = fa_scores_df.copy()
+            fa_scores_df_with_coords['x_utm'] = df.loc[data_for_analysis.index, 'x_utm'].values
+            fa_scores_df_with_coords['y_utm'] = df.loc[data_for_analysis.index, 'y_utm'].values
+
+            # Create GeoDataFrame
             gdf_fa_scores = gpd.GeoDataFrame(
                 fa_scores_df_with_coords,
-                geometry=gpd.points_from_xy(fa_scores_df_with_coords.x_utm, fa_scores_df_with_coords.y_utm),
-                crs="EPSG:32721"  # Adjust CRS as appropriate
+                geometry=gpd.points_from_xy(
+                    fa_scores_df_with_coords.x_utm, 
+                    fa_scores_df_with_coords.y_utm
+                ),
+                crs="EPSG:32721"
             )
+            
         except Exception as e:
-            logging.error(f"Error creating GeoDataFrame for factor scores: {e}")
-            map_rows = [dbc.Row(dbc.Col(html.Div(f"Error creating geographic data for factor scores: {e}"), width=12))]
+            error_msg = f"Error preparing geographic data: {str(e)}"
+            logging.error(error_msg)
+            map_rows = [dbc.Row(dbc.Col(html.Div(error_msg), width=12))]
             return scree_fig_fa, variance_fig_fa, heatmap_fig_fa, map_rows
 
         if gdf_fa_scores.empty:
@@ -342,6 +382,7 @@ def factor_analysis_callbacks(app):
             else:
                 map_fig = make_empty_figure(f'<b>Factor {i+1} Score Map: Data not available.</b>')
             map_cols.append(dbc.Col(dcc.Graph(figure=map_fig), width=6))
+
         # Arrange maps in rows (2 per row)
         for i in range(0, len(map_cols), 2):
             map_rows.append(dbc.Row(map_cols[i:i+2], className="mb-4"))
