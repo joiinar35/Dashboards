@@ -16,6 +16,9 @@ app = Dash(
         dbc.themes.BOOTSTRAP,
         "assets/style.css"  # Custom CSS
     ],
+    external_scripts=[
+        'https://cdn.plot.ly/plotly-2.24.1.min.js'
+    ],
     suppress_callback_exceptions=True
 )
 
@@ -77,4 +80,4 @@ def render_page(tab):
 server = app.server
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+  app.run(debug=True)
