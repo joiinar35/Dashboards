@@ -2,6 +2,7 @@
 from dash import Dash, html, dcc
 import dash_bootstrap_components as dbc
 from dash import Input, Output
+import os
 
 # Import pages
 from pages.data_viz import data_viz_layout, data_viz_callbacks
