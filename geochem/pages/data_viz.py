@@ -51,7 +51,7 @@ data_viz_layout = dbc.Container([
         dbc.Col(html.Div([
             html.P("This tab provides interactive visualizations of the geochemical data from a given geographical location and sample set."),
             html.P("Select an element to explore its distribution and correlations."),
-            html.Ul([
+            html.P(html.Ul([
                 html.Li([
                     "The ", html.Strong("Distribution of Selected Element"), " plot shows the distribution using violin and box plot."
                 ]),
@@ -61,7 +61,8 @@ data_viz_layout = dbc.Container([
                 html.Li([
                     "The ", html.Strong("Correlation Matrix"), " heatmap shows the correlation matrix for all geochemical elements."
                 ])
-            ])
+            ])),
+            html.P("The white dots mark the location of the samples in the map"),
         ], className="explanation-text"), width=12),
     ]),
     dbc.Row([
@@ -77,7 +78,7 @@ data_viz_layout = dbc.Container([
             ),
             html.Hr(),
             html.Div(id='controls')
-        ], width=3, className="sidebar"),
+        ], width=2, className="sidebar"),
         # Main content
         dbc.Col([
             dbc.Row([
@@ -89,7 +90,7 @@ data_viz_layout = dbc.Container([
             dbc.Row([
                 dbc.Col(dcc.Graph(id='correlation-matrix', config={"displayModeBar": False}), width=12),
             ], className="graph-container"),
-        ], width=9)
+        ], width=10)
     ])
 ], fluid=True)
 
@@ -122,7 +123,7 @@ def data_viz_callbacks(app):
         # Clean data
         mask = df[['x_utm', 'y_utm', selected_column]].dropna()
         if mask.empty:
-            return go.Figure().update_layout(
+            return go.Figure().update_layout( width=800, height=600,
                 title=dict(
                     text="<b>Interpolated Contour Map: No valid sample locations.</b>",
                     x=0.5, xanchor="center", y=0.9, yanchor="top",
@@ -191,7 +192,7 @@ def data_viz_callbacks(app):
             yaxis=dict(
                 showticklabels=False, showgrid=False, zeroline=False, 
                 showline=False, ticks=''),
-            height=400,
+            height=800,
             margin=dict(l=40, r=20, t=50, b=30),
         )
         return fig
@@ -228,8 +229,8 @@ def data_viz_callbacks(app):
         fig = make_subplots(
             rows=1, cols=2,
             subplot_titles=(
-                f'Violin Plot of {title}',
-                f'Box Plot of {title}'
+                f'<b>Violin Plot of {title}</b>',
+                f'<b>Box Plot of {title}</b>'
             )
         )
         
@@ -248,7 +249,7 @@ def data_viz_callbacks(app):
             showlegend=False,
             height=400,
             title_x=0.5,
-            title_y=0.9,
+            title_y=1,
             margin=dict(l=40, r=20, t=50, b=30),
         )
         return fig
@@ -263,7 +264,7 @@ def data_viz_callbacks(app):
             return go.Figure().update_layout(
                 title=dict(
                     text="<b>Correlation Matrix of Geochemical Elements</b>",
-                    x=0.5, y=0.9, xanchor="center", yanchor="top",
+                    x=0.5, y=1, xanchor="center", yanchor="top",
                     font=dict(size=16, color="black", family="Arial")
                 )
             )
