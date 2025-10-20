@@ -32,15 +32,15 @@ def get_data():
 pca_analysis_layout = dbc.Container([
     dbc.Row([
         dbc.Col(html.Div([
-            html.P("The PCA loadings heatmap shows how much each original variable contributes to each principal component."),
-            html.P("• Rows represent your original geochemical variables (e.g., Ba, Co, Cr)."),
-            html.P("• Columns represent the principal components (PC1, PC2, etc.)."),
-            html.P("• Colors and Values: The color and the number in each cell indicate the 'loading' of that variable on that principal component."),
-            html.Ul([
+            html.P(html.Strong("The PCA loadings heatmap shows how much each original variable contributes to each principal component.")),
+            html.P([html.Strong("• Rows"), "represent your original geochemical variables (e.g., Ba, Co, Cr)."]),
+            html.P([html.Strong("• Columns"), "represent the principal components (PC1, PC2, etc.)."]),
+            html.P([html.Strong("• Colors and Values: "), "The color and the number in each cell indicate the 'loading' of that variable on that principal component."]),
+            html.P(html.Ul([
                 html.Li("A high positive loading (warm colors, closer to 1) means the variable is strongly and positively correlated with that principal component."),
                 html.Li("A high negative loading (cool colors, closer to -1) means the variable is strongly and negatively correlated with that principal component."),
                 html.Li("A loading close to zero (around the center color) means the variable has little influence on that principal component.")
-            ]),
+            ])),
             html.P("By looking at the variables with high absolute loadings on each principal component, you can interpret what each component represents in terms of the original geochemical data.")
         ], className="explanation-text"), width=12),
     ]),
@@ -52,8 +52,8 @@ pca_analysis_layout = dbc.Container([
             html.Label("Number of Components:"),
             dcc.Dropdown(
                 id='n-components-dropdown',
-                options=[{'label': str(i), 'value': i} for i in range(2, len(data_for_analysis.columns) + 1)] if not data_for_analysis.empty else [],
-                value=min(3, len(data_for_analysis.columns)) if not data_for_analysis.empty else None,
+                options=[{'label': str(i), 'value': i} for i in range(2, len(data_for_analysis.columns) - 5)] if not data_for_analysis.empty else [],
+                value=min(2, len(data_for_analysis.columns)) if not data_for_analysis.empty else None,
                 clearable=False,
                 disabled=data_for_analysis.empty
             ),
@@ -62,12 +62,12 @@ pca_analysis_layout = dbc.Container([
             html.Label("Number of Clusters (k):"),
             dcc.Dropdown(
                 id='n-clusters-dropdown',
-                options=[{'label': str(i), 'value': i} for i in range(2, 12)],
+                options=[{'label': str(i), 'value': i} for i in range(2, 6)],
                 value=2,
                 clearable=False
             ),
             html.Div(id='pca-controls-placeholder')
-        ], width=3, className="sidebar"),
+        ], width=2, className="sidebar"),
 
         # Main content
         dbc.Col([
@@ -91,7 +91,7 @@ pca_analysis_layout = dbc.Container([
             dbc.Row([
                 dbc.Col(html.Div(id='pca-error-message', className="text-danger"), width=12)
             ])
-        ], width=9)
+        ], width=10)
     ])
 ], fluid=True)
 
@@ -206,7 +206,7 @@ def pca_analysis_callbacks(app):
                 yaxis_title='Explained Variance Ratio',
                 margin={"r": 0, "t": 40, "l": 0, "b": 0},
                 legend=dict(
-                    x=0.95, y=0.95,
+                    x=0.95, y=0.75,
                     xanchor='right', yanchor='top',
                     bgcolor='rgba(255, 255, 255, 0.5)'
                 )
@@ -235,7 +235,7 @@ def pca_analysis_callbacks(app):
             heatmap_fig.update_layout(
                 title=dict(
                     text='<b>PCA Loadings Heatmap</b>',
-                    x=0.5, y=0.9, xanchor="center", yanchor="top",
+                    x=0.5, y=1, xanchor="center", yanchor="top",
                     font=dict(size=16, color="black", family="Arial")),
                 xaxis_title='Principal Component',
                 yaxis_title='Variable',
@@ -377,7 +377,7 @@ def pca_analysis_callbacks(app):
                     showticklabels=False, showgrid=False, 
                     zeroline=False, showline=False, ticks=''
                 ),
-                height=600,
+                height=800,
             )
             
             return fig

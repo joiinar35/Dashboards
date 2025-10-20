@@ -47,9 +47,9 @@ def get_dropdown_options():
 factor_analysis_layout = dbc.Container([
     dbc.Row([
         dbc.Col(html.Div([
-            html.P("Factor Analysis helps identify underlying factors that explain the relationships between variables."),
+            html.P(html.Strong("Factor Analysis helps identify underlying factors that explain the relationships between variables.")),
             html.P("The Factor Analysis Loadings Heatmap shows the relationships between your original geochemical variables and the underlying factors:"),
-            html.Ul([
+            html.P(html.Ul([
                 html.Li([html.Strong("Rows: "), "Original geochemical variables (e.g., Ba, Co)."]),
                 html.Li([html.Strong("Columns: "),  "Factors identified by the analysis (Factor 1, Factor 2, etc.)."]),
                 html.Li([html.Strong("Colors and Values: "), "Indicate the 'loading' of a variable on a factor."]),
@@ -58,8 +58,9 @@ factor_analysis_layout = dbc.Container([
                     html.Li("High negative loading (cool colors, closer to -1): Variable is strongly and negatively associated with the factor."),
                     html.Li("Loading near zero: Variable has little influence on that factor.")
                 ])
-            ]),
-            html.P("By interpreting variables with high absolute loadings on each factor, you can understand the geological or geochemical processes represented by each factor.")
+            ])),
+            html.P("By interpreting variables with high absolute loadings on each factor, you can understand the geological or geochemical processes represented by each factor."),
+            html.P("The Factor Score Maps provide a glimpse the geographical predominance of each factor along the study area")
         ], className="explanation-text"), width=12),
     ]),
 
@@ -76,7 +77,7 @@ factor_analysis_layout = dbc.Container([
                 disabled=data_for_analysis.empty
             ),
             html.Div(id='fa-controls-placeholder')
-        ], width=3, className="sidebar"),
+        ], width=2, className="sidebar"),
 
         # Main content
         dbc.Col([
@@ -90,7 +91,7 @@ factor_analysis_layout = dbc.Container([
             ]),
 
             dbc.Row(id='factor-score-maps-row', children=[]),
-        ], width=9)
+        ], width=10)
     ])
 ], fluid=True)
 
@@ -160,7 +161,7 @@ def make_variance_plot(fa_variance, valid_n_factors):
         legend_title='Variance Type',
         margin={"r": 0, "t": 40, "l": 0, "b": 0},
         legend=dict(
-            x=0.95, y=0.95, xanchor='right', yanchor='top',
+            x=0.95, y=0.75, xanchor='right', yanchor='top',
             bgcolor='rgba(255, 255, 255, 0.5)'
         )
     )
@@ -185,7 +186,7 @@ def make_loadings_heatmap(fa_loadings, data_for_analysis, valid_n_factors):
     fig.update_layout(
         title=dict(
             text='<b>Factor Analysis Loadings Heatmap</b>',
-            x=0.5, y=0.9, xanchor="center", yanchor="top",
+            x=0.5, y=1, xanchor="center", yanchor="top",
             font=dict(size=16, color="black", family="Arial")
         ),
         xaxis_title='Factor',
@@ -243,7 +244,7 @@ def make_factor_score_map(gdf_fa_scores, factor_score_col, i):
                 showticklabels=False, showgrid=False, 
                 zeroline=False, showline=False, ticks=''
             ),
-            height=400
+            height=600
         )
         return fig
         
