@@ -15,6 +15,18 @@
     padding: 10px 0;
 }
 
+.li li {
+    color: white;
+}
+
+.ul li {
+    color: white;
+}
+
+.div {
+    color: white
+}
+
 /* Navigation Tabs */
 .navigation-row {
     margin-bottom: 30px;
@@ -47,11 +59,11 @@
 
 /* Default (unselected) tab styling */
 .custom-tab {
-  background-color: linear-gradient(115deg, #0c0014, #117aca); /* Our blue background */
+  background-color: #1d2a3a; /* Our blue background */
   border: 1px solid #FF5e38;
   border-bottom: none;
   padding: 0.5rem 1rem;
-  color: #ffffff;             /* Bootstrap text color */
+  color: #30123B             /* Bootstrap text color */
   font-weight: 500;
   border-top-left-radius: .25rem;
   border-top-right-radius: .25rem;
@@ -62,14 +74,14 @@
 
 /* On hover, mimic Bootstrap's nav-link:hover */
 .custom-tab:hover {
-  background-color: #547792;
-  color: #FF5e38;
+  background-color: #C0E9CC;
+  color:  #1d2a3a;
 }
 
 /* Selected (active) tab styling */
 .custom-tab--selected {
-  background-color: linear-gradient(115deg, #1d2a3a, #117aca);
-  color: #ffffff;
+  background-color: #6AD2AD;
+  color: #C0E9CC;
   border: 1px solid #FF5e38;
   border-bottom: 2px solid #fff; /* Make the active tab connect to content */
   font-weight: bold;
@@ -85,7 +97,7 @@
 
 /* Page Content */
 .page-content {
-    min-height: 600px;
+    min-height: 800px;
     padding: 20px 0;
 }
 
@@ -96,6 +108,7 @@
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     height: fit-content;
+    color: orange;
 }
 
 .sidebar h4 {
@@ -158,7 +171,7 @@
 
 /* Explanation Text */
 .explanation-text {
-    background-color: #117aca;
+    background: linear-gradient(115deg, #1d2a3a, #2bbdb3);
     border-left: 4px solid #0052CC;
     padding: 15px;
     border-radius: 0 5px 5px 0;
