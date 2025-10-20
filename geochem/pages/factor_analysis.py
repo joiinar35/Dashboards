@@ -40,7 +40,7 @@ def get_dropdown_options():
         return [{'label': '1', 'value': 1}]
     
     n_cols = len(data_for_analysis.columns)
-    max_n = max(1, n_cols)
+    max_n = max(1, n_cols-7)
     return [{'label': str(i), 'value': i} for i in range(1, max_n + 1)]
 
 # Layout for Factor Analysis page
