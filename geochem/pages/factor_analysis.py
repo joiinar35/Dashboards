@@ -27,7 +27,7 @@ if not data_for_analysis.empty:
         fa_initial = FactorAnalyzer(rotation=None, n_factors=data_for_analysis.shape[1])
         fa_initial.fit(data_for_analysis)
         eigenvalues_fa_initial, _ = fa_initial.get_eigenvalues()
-        n_factors_initial = sum(eigenvalues_fa_initial > 1) if eigenvalues_fa_initial is not None else 1
+        n_factors_initial = np.sum(eigenvalues_fa_initial > 1) if eigenvalues_fa_initial is not None else 1
     except Exception as e:
         logging.warning(f"Error calculating initial factors: {e}")
         n_factors_initial = 1
