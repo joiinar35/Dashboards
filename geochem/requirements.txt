@@ -3,7 +3,7 @@
 
 # --- Dash Framework & Extensions ---
 dash==2.14.2
-#dash-bootstrap-components==1.5.0
+dash-bootstrap-components==1.5.0
 dash-table==5.0.0   # Included for legacy, but dash>=2.0 has DataTable. Safe to keep if used.
 
 # --- Data Processing & Analysis ---
@@ -30,9 +30,9 @@ gunicorn==21.2.0
 
 # --- Utilities ---
 click==8.1.7
-joblib==1.3.2
-threadpoolctl==3.2.0
-typing-extensions==4.8.0
+#joblib==1.3.2
+#threadpoolctl==3.2.0
+#typing-extensions==4.8.0
 # importlib-metadata==6.8.0  # Only needed for Python <3.8
 
 # --- Optional: Enhanced Performance ---
