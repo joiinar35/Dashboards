@@ -20,13 +20,13 @@ shapely==2.0.2
 
 # --- Visualization ---
 plotly==5.17.0
-seaborn==0.13.0
-matplotlib==3.8.2
+#seaborn==0.13.0
+#matplotlib==3.8.2
 
 # --- Web Server (Production) ---
 flask==3.0.0
 gunicorn==21.2.0
-werkzeug==3.0.1
+#werkzeug==3.0.1
 
 # --- Utilities ---
 click==8.1.7
