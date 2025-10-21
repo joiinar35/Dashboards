@@ -12,6 +12,12 @@ from scipy.interpolate import griddata
 import logging
 from factor_analyzer import FactorAnalyzer
 
+# PATCH: Fix for scipy.sum issue
+import scipy
+if not hasattr(scipy, 'sum'):
+    scipy.sum = np.sum
+# END PATCH
+
 # Import from shared_data module
 try:
     from shared_data import data_for_analysis, df, column_title_map
@@ -20,6 +26,8 @@ except ImportError:
     data_for_analysis = pd.DataFrame()
     df = pd.DataFrame()
     column_title_map = {}
+
+
 
 # Calculate initial number of factors for dropdown
 if not data_for_analysis.empty:
