@@ -20,6 +20,9 @@ except ImportError:
     data_for_analysis = pd.DataFrame()
     df = pd.DataFrame()
     column_title_map = {}
+    
+if not hasattr(scipy, 'sum'):
+    scipy.sum = np.sum    
 
 # Calculate initial number of factors for dropdown
 if not data_for_analysis.empty:
