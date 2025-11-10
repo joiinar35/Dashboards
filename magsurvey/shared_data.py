@@ -5,6 +5,7 @@ from scipy.fft import fft2, ifft2
 from scipy.ndimage import gaussian_filter
 from scipy.signal import windows
 from scipy.interpolate import NearestNDInterpolator
+import plotly.graph_objects as go
 
 # Load all datasets
 def load_survey_data():
@@ -32,14 +33,18 @@ incl = -40.3      # Inclination
 # Observatory and sensor hut coordinates
 OBSERVATORY_LAT = -34.33344
 OBSERVATORY_LON = -54.71229
-SENSOR_HUT_LAT = -34.33306
+SENSOR_HUT_LAT = -34.33305
 SENSOR_HUT_LON = -54.71218
 
 # Common grid creation function
 def create_interpolation_grid(df, grid_points=100):
     """Create interpolation grid for survey data"""
-    x = df['Longitude (deg)'].values if 'Longitude (deg)' in df.columns else df['Longitud (deg)'].values
-    y = df['Latitude (deg)'].values if 'Latitude (deg)' in df.columns else df['Latitud (deg)'].values
+    if 'Longitude (deg)' in df.columns:
+        x = df['Longitude (deg)'].values 
+        y = df['Latitude (deg)'].values
+    else:
+        x = df['Longitud (deg)'].values
+        y = df['Latitud (deg)'].values
     
     xi = np.linspace(x.min(), x.max(), grid_points)
     yi = np.linspace(y.min(), y.max(), grid_points)
