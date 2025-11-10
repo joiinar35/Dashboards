@@ -1,1 +1,168 @@
+/* Custom styles for Dash application */
 
+/* Main layout styling */
+.bg-light {
+    background: linear-gradient(135deg, #1d2a3a 0%, #1d2a3a 100%) !important;
+    border-right: 1px solid #34495e;
+    color: white;
+}
+
+/* Title styling */
+.text-center {
+    color: white !important;
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Card header gradient styling */
+.card-header {
+    background: linear-gradient(90deg, #1d2a3a 0%, #1d2a3a 50%, #00b4db 100%) !important;
+    color: white !important;
+    font-weight: 600;
+    border-bottom: none;
+    padding: 1rem 1.25rem;
+}
+
+/* Card body styling */
+.card-body {
+    background-color: #f8f9fa;
+    border-radius: 0 0 12px 12px;
+}
+
+/* Card overall styling */
+.card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: none;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Tab styling - UPDATED */
+.custom-tab {
+    background-color: #FFF9C4 !important;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    color: #2c3e50 !important;
+    font-weight: 700 !important;
+    font-size: 1.1rem !important;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.custom-tab:hover {
+    background-color: #FFF59D !important;
+    transform: translateY(-2px);
+    color: #2c3e50 !important;
+    border-color: #FBC02D;
+}
+
+.custom-tab--selected {
+    background: linear-gradient(90deg, #1d2a3a 0%, #1d2a3a 100%);
+    color: #0FD6A8 !important;
+    font-weight: 700 !important;
+    font-size: 1.1rem !important;
+    box-shadow: 0 6px 16px rgba(15, 214, 168, 0.4);
+    border: 2px solid #0FD6A8;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Graph container styling */
+.dcc-graph {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* List styling in cards */
+.card-body ul {
+    padding-left: 1rem;
+}
+
+.card-body li {
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+}
+
+/* Text color adjustments for dark sidebar */
+.bg-light .text-muted {
+    color: #bdc3c7 !important;
+}
+
+/* Button styling adjustments */
+.btn-primary {
+    background: linear-gradient(90deg, #1d2a3a 0%, #00b4db 100%);
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(90deg, #1d2a3a 0%, #0099cc 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 180, 219, 0.3);
+}
+
+/* Custom scrollbar for sidebar */
+.bg-light::-webkit-scrollbar {
+    width: 6px;
+}
+
+.bg-light::-webkit-scrollbar-track {
+    background: #1d2a3a;
+}
+
+.bg-light::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #00b4db 0%, #1d2a3a 100%);
+    border-radius: 3px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .bg-light {
+        border-right: none;
+        border-bottom: 1px solid #34495e;
+    }
+    
+    .card-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .custom-tab {
+        font-size: 1rem !important;
+        padding: 12px 16px;
+    }
+}
+
+/* Animation for smooth transitions */
+.card, .custom-tab, .btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Additional visual enhancements */
+.mb-4 {
+    margin-bottom: 2rem !important;
+}
+
+/* Custom border radius for graphs */
+.js-plotly-plot .plotly .modebar {
+    border-radius: 0 0 8px 8px;
+}
+
+/* Ensure text colors are properly applied */
+.custom-tab span {
+    color: inherit !important;
+    font-weight: inherit !important;
+    font-size: inherit !important;
+}
