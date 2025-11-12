@@ -1,96 +1,102 @@
-import dash
-from dash import dcc, html, callback, Input, Output
-import dash_bootstrap_components as dbc
+import streamlit as st
+import pandas as pd
+import numpy as np
+import plotly.graph_objects as go
+import plotly.express as px
+from shared_data import survey_df, gradiometer_df, survey_xi, survey_yi, survey_zi, add_observatory_markers
+from shared_data import dx_survey, dy_survey, decl, incl, create_data_mask, extrapolate_nans, reduction_to_pole_improved
 
-# Initialize the Dash 
-
-# app = dash.Dash(
-#     __name__,
-#     external_stylesheets=[
-#         dbc.themes.BOOTSTRAP,
-#         "assets/style.css"  # Custom CSS
-#     ],
-#     # external_scripts=[
-#     #     'https://cdn.plot.ly/plotly-2.24.1.min.js'
-#     # ],
-#     suppress_callback_exceptions=True,
-#     title="Magnetic Survey Analysis")
-
-app = dash.Dash(__name__, 
-                 external_stylesheets=[dbc.themes.BOOTSTRAP,
-                "assets/style.css"],  # Custom CSS
-                 suppress_callback_exceptions=True,
-                 title="Magnetometry Analysis")
-
-
-
-# Add this to your app layout or in a separate CSS file
-app.layout = dbc.Container([
-    dbc.Row([
-        dbc.Col([
-            html.H1("Magnetic Survey Analysis", 
-                   className="text-center mb-3",
-                   style={'color': '#2c3e50'}),
-            html.Hr(),
-            dcc.Tabs(
-                id="left-tabs",
-                value='surveyed-data',
-                vertical=True,
-                children=[
-                    dcc.Tab(
-                        label='Survey Data',
-                        value='surveyed-data',
-                        className='custom-tab',
-                        selected_className='custom-tab--selected',
-                        style={'width': '100%'}  # Individual tab width
-                    ),
-                    dcc.Tab(
-                        label='Magnetic Gradients',
-                        value='magnetic-gradients', 
-                        className='custom-tab',
-                        selected_className='custom-tab--selected',
-                        style={'width': '100%'}  # Individual tab width
-                    ),
-                    dcc.Tab(
-                        label='Reduction to the Pole',
-                        value='reduction-to-pole',
-                        className='custom-tab',
-                        selected_className='custom-tab--selected',
-                        style={'width': '100%'}  # Individual tab width
-                    ),
-                ],
-                style={
-                    'height': '100%', 
-                   # 'borderRight': '1px solid #dee2e6',
-                    'width': '100%'
-                }
-            ),
-        ], width=3, className="bg-light p-4", style={'minHeight': '100vh'}),
-
-        dbc.Col([
-            html.Div(id='tab-content', className="p-4")
-        ], width=9),
-    ])
-], fluid=True)
-
-# Import page layouts
-from pages.surveyed_data import layout as surveyed_data_layout
-from pages.magnetic_gradients import layout as magnetic_gradients_layout
-from pages.reduction_to_pole import layout as reduction_to_pole_layout
-
-@callback(
-    Output('tab-content', 'children'),
-    Input('left-tabs', 'value')
+# Set page config
+st.set_page_config(
+    page_title="Magnetic Survey Analysis",
+    page_icon="🧲",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
-def render_content(tab):
-    if tab == 'surveyed-data':
-        return surveyed_data_layout
-    elif tab == 'magnetic-gradients':
-        return magnetic_gradients_layout
-    elif tab == 'reduction-to-pole':
-        return reduction_to_pole_layout
-    else:
-        return html.Div("Select a tab")
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# Sidebar navigation
+st.sidebar.title("Magnetic Survey Analysis")
+page = st.sidebar.radio("Navigate to:", [
+    "Survey Data", 
+    "Magnetic Gradients", 
+    "Reduction to the Pole"
+])
+
+# Survey Data Page
+if page == "Survey Data":
+    st.title("Survey Data")
+    
+    # Data summary cards
+    col1, col2 = st.columns([1, 2])
+    
+    with col1:
+        st.subheader("Data Summary")
+        st.metric("Total Stations", len(survey_df))
+        st.metric("Magnetic Field Range", f"{survey_df['B(nT)'].min():.1f} - {survey_df['B(nT)'].max():.1f} nT")
+        st.metric("Latitude Range", f"{survey_df['Latitude (deg)'].min():.5f} - {survey_df['Latitude (deg)'].max():.5f}°")
+        st.metric("Longitude Range", f"{survey_df['Longitude (deg)'].min():.5f} - {survey_df['Longitude (deg)'].max():.5f}°")
+    
+    with col2:
+        st.subheader("Survey Details")
+        st.markdown("""
+        **The Problem:**  
+        Magnetic survey of a property of approximately one hectare to evaluate the feasibility 
+        of installing a magnetic station on the site. We analyze data from unevenly spaced data 
+        points along the study area. The datasets includes a simple magnetic survey plus a 
+        gradiometric survey. The survey was performed with a portable proton magnetometer and 
+        the gradiometric one with two vertically stacked Overhauser sensors at 1m of separation.
+        """)
+    
+    # Data table
+    st.subheader("Data Table")
+    st.dataframe(survey_df, use_container_width=True)
+    
+    # Grid plot
+    st.subheader("Magnetic Field Grid Plot")
+    
+    # Recreate the grid plot (simplified version)
+    fig = go.Figure()
+    
+    # Add heatmap
+    fig.add_trace(
+        go.Heatmap(
+            x=survey_xi.flatten(),
+            y=survey_yi.flatten(), 
+            z=survey_zi.flatten(),
+            colorscale='Viridis',
+            colorbar=dict(title="B (nT)")
+        )
+    )
+    
+    # Add data points
+    fig.add_trace(
+        go.Scatter(
+            x=survey_df['Longitude (deg)'],
+            y=survey_df['Latitude (deg)'],
+            mode='markers',
+            marker=dict(color='red', size=6),
+            name='Survey Stations'
+        )
+    )
+    
+    fig.update_layout(
+        title="Magnetic Field (Total Intensity)",
+        height=600
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
+    st.caption("Red markers show actual survey station locations")
+
+# Magnetic Gradients Page
+elif page == "Magnetic Gradients":
+    st.title("Magnetic Gradients")
+    
+    # Your magnetic gradients code here (simplified)
+    st.info("Magnetic gradients analysis would go here...")
+
+# Reduction to the Pole Page  
+elif page == "Reduction to the Pole":
+    st.title("Reduction to the Pole (RTP)")
+    
+    # Your RTP code here (simplified)
+    st.info("Reduction to the pole analysis would go here...")
