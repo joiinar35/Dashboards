@@ -16,7 +16,6 @@ st.set_page_config(
 
 # Sidebar navigation
 st.sidebar.title("Magnetic Survey Analysis")
-st.sidebar.success("Select a page above.")
 page = st.sidebar.radio("Navigate to:", [
     "Survey Data", 
     "Magnetic Gradients", 
