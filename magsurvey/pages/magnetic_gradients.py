@@ -4,22 +4,15 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 from scipy.interpolate import griddata
+from shared_data import survey_df, gradiometer_df, survey_xi, survey_yi, survey_zi, grad_zi, Delta_x, Delta_y, add_observatory_markers
 
-# Load data
-df = pd.read_csv('data/magnetometria2.csv')
-gdf = pd.read_csv('data/gradiometria.csv')
-
-gdf = gdf.iloc[:,[0,1,3,4,5]]
-
-df.set_index('station', inplace=True)
-
-# Constants for the derivative, dx != dy at Earth's surface (it is a Geoid)
-Delta_x = 106e3   # m/deg  in N-S
-Delta_y = 110e3   # m/deg  in E-W
+# Use the pre-loaded data from shared_data.py
+df = survey_df
+gdf = gradiometer_df
 
 # Extract coordinates and values from df
-x = df['Longitude'].values
-y = df['Latitude'].values
+x = df['Longitude (deg)'].values
+y = df['Latitude (deg)'].values
 z = df['B(nT)'].values
 
 # Extract coordinates and values from gdf
@@ -27,17 +20,15 @@ gx = gdf['Longitud (deg)'].values
 gy = gdf['Latitud (deg)'].values
 gz = gdf['dB (nT)'].values
 
-# Create a regular grid
-xi = np.linspace(x.min(), x.max(), 100)
-yi = np.linspace(y.min(), y.max(), 100)
-xi, yi = np.meshgrid(xi, yi)
+# Use the pre-calculated grid from shared_data.py
+xi = survey_xi
+yi = survey_yi
+zi = survey_zi
+gzi = grad_zi
 
-dx = Delta_x*abs(x.max()-x.min())/len(xi)
-dy = Delta_y*abs(y.max()-y.min())/len(yi)
-
-# Interpolate using simple cubic interpolation 
-zi = griddata((x, y), z, (xi, yi), method='cubic')
-gzi = griddata((gx, gy), gz, (xi, yi), method='cubic')
+# Calculate grid spacing using shared constants
+dx = Delta_x * abs(x.max()-x.min()) / len(xi[0])
+dy = Delta_y * abs(y.max()-y.min()) / len(yi[:,0])
 
 # Calculate gradients 
 (dBx, dBy) = np.gradient(zi, dy, dx)
@@ -61,12 +52,6 @@ xx, yy = np.meshgrid(xi[0], yi[:,0])
 
 # Plotting gridded data
 def create_grid_plot():
-    # Coordinates for markers
-    observatory_lat = -34.33344
-    observatory_lon = -54.71229
-    sensor_hut_lat = -34.33306
-    sensor_hut_lon = -54.71218
-    
     # Create figure for horizontal gradient
     fig_horizontal = go.Figure()
     
@@ -126,65 +111,8 @@ def create_grid_plot():
         )
     )
     
-    # Add Observatory Building marker to horizontal gradient
-    fig_horizontal.add_trace(
-        go.Scatter(
-            x=[observatory_lon],
-            y=[observatory_lat],
-            mode='markers+text',
-            marker=dict(
-                size=12,
-                color='white',
-                symbol='square',
-                line=dict(width=2, color='black')
-            ),
-            text=['Observatory'],
-            textposition='top center',
-            textfont=dict(
-                size=12,
-                color='white',
-                family='Arial, bold'
-            ),
-            name='Observatory Building',
-            hovertemplate=(
-                '<b>Observatory Building</b><br>' +
-                'Longitude: %{x:.6f}°<br>' +
-                'Latitude: %{y:.6f}°<br>' +
-                '<extra></extra>'
-            ),
-            showlegend=False
-        )
-    )
-    
-    # Add Sensor Hut marker to horizontal gradient
-    fig_horizontal.add_trace(
-        go.Scatter(
-            x=[sensor_hut_lon],
-            y=[sensor_hut_lat],
-            mode='markers+text',
-            marker=dict(
-                size=12,
-                color='yellow',
-                symbol='circle',
-                line=dict(width=2, color='black')
-            ),
-            text=['Sensor Hut'],
-            textposition='top center',
-            textfont=dict(
-                size=12,
-                color='yellow',
-                family='Arial, bold'
-            ),
-            name='Sensor Hut',
-            hovertemplate=(
-                '<b>Sensor Hut</b><br>' +
-                'Longitude: %{x:.6f}°<br>' +
-                'Latitude: %{y:.6f}°<br>' +
-                '<extra></extra>'
-            ),
-            showlegend=False
-        )
-    )
+    # Add observatory and sensor hut markers using shared function
+    fig_horizontal = add_observatory_markers(fig_horizontal)
     
     # Configure layout for horizontal gradient
     fig_horizontal.update_layout(
@@ -303,65 +231,8 @@ def create_grid_plot():
         )
     )
     
-    # Add Observatory Building marker to vertical gradient
-    fig_vertical.add_trace(
-        go.Scatter(
-            x=[observatory_lon],
-            y=[observatory_lat],
-            mode='markers+text',
-            marker=dict(
-                size=12,
-                color='white',
-                symbol='square',
-                line=dict(width=2, color='black')
-            ),
-            text=['Observatory'],
-            textposition='top center',
-            textfont=dict(
-                size=12,
-                color='white',
-                family='Arial, bold'
-            ),
-            name='Observatory Building',
-            hovertemplate=(
-                '<b>Observatory Building</b><br>' +
-                'Longitude: %{x:.6f}°<br>' +
-                'Latitude: %{y:.6f}°<br>' +
-                '<extra></extra>'
-            ),
-            showlegend=False
-        )
-    )
-    
-    # Add Sensor Hut marker to vertical gradient
-    fig_vertical.add_trace(
-        go.Scatter(
-            x=[sensor_hut_lon],
-            y=[sensor_hut_lat],
-            mode='markers+text',
-            marker=dict(
-                size=12,
-                color='yellow',
-                symbol='circle',
-                line=dict(width=2, color='black')
-            ),
-            text=['Sensor Hut'],
-            textposition='top center',
-            textfont=dict(
-                size=12,
-                color='yellow',
-                family='Arial, bold'
-            ),
-            name='Sensor Hut',
-            hovertemplate=(
-                '<b>Sensor Hut</b><br>' +
-                'Longitude: %{x:.6f}°<br>' +
-                'Latitude: %{y:.6f}°<br>' +
-                '<extra></extra>'
-            ),
-            showlegend=False
-        )
-    )
+    # Add observatory and sensor hut markers using shared function
+    fig_vertical = add_observatory_markers(fig_vertical)
     
     # Configure layout for vertical gradient
     fig_vertical.update_layout(
@@ -406,7 +277,8 @@ fig_horizontal, fig_vertical = create_grid_plot()
 layout = html.Div([
     html.H2("Magnetic Gradients", className="mb-4"),
     dcc.Markdown(r"""This tab displays calculated magnetic gradients from the survey data. This technique helps
-                 to identify and locate buried sources of magnetization. **Hover over the plots to see detailed gradient values and measurement locations.**"""),
+                 to identify and locate buried sources of magnetization. **Hover over the plots to see detailed 
+                 gradient values and measurement locations.**"""),
     
     dbc.Row([
         dbc.Col([
@@ -418,29 +290,34 @@ layout = html.Div([
                     html.P(f"Average Vertical Gradient: {dBz_avg:.3f} nT/m"),
                     html.P(f"Max Vertical Gradient: {dBz_max:.3f} nT/m"),
                     html.Hr(),
+                    html.P("Labels:", style={'fontWeight': 'bold'}),
                     html.Ul([
-                        html.Li("White squares: Measurement points"),
+                        html.Li("White dots: Measurement points"),
                         html.Li("Green diamonds: Gradiometer points"),
-                       # html.Li("White square: Observatory building"),
-                        #html.Li("Yellow circle: Sensor hut"),
+                        html.Li("White square: Observatory building"),
+                        html.Li("Yellow circle: Sensor hut"),
                     ])
                 ])
             ])
         ], width=6),
+        
         dbc.Col([
             dbc.Card([
-                dbc.CardHeader("General Notes"),
+                dbc.CardHeader("Key Notes"),
                 dbc.CardBody([
                    dcc.Markdown(r"""The maps show the spatial distribution of the total horizontal magnetic gradient
-                          dBh and the gradiometric profile showing vertical gradient respectively dBz.    
-                          Both graphs show a clear anomaly close to the south east corner which corresponds to the 
-                          proximity of the shelter. 
-                          These anomalies are localized near the edges of the area.  
+                          dBh and the gradiometric profile showing vertical gradient dBz, respectively.  
+                          Both graphs show large anomalies close to the west and southeast edges of the
+                          surveyed area.    
                           The main causes of such anomalies are due to buried ferromagnetic objects or the proximitiy
-                          to buildings, fences, etc.                              
+                          to building remains, fences, etc.                                
                           In general there is a good agreement between the three graphs denoting that 
-                          the largest magnetic gradients occur in the vertical direction.  
-                          The area of the gradiometric survey is slightly smaller than the magnetic one.""")       
+                          the largest magnetic gradients occur in the vertical direction.   
+                          The area of the gradiometric survey is slightly smaller than the magnetic one.
+                          Despite some large vertical gradients in the area, the planed sensor hut is located over 
+                          a low gradient area which makes the site suitable to take acceptable magnetic readings.  
+                          Gradiometry is widely used in archaeological and mining  prospection to identify hidden
+                          building foundations, buried unexploded ordnance, mineral deposits, etc.  """)       
                 ])
             ])      
         ], width=6)           

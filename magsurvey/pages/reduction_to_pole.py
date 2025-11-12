@@ -1,248 +1,36 @@
 from dash import dcc, html
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
-import pandas as pd
 import numpy as np
-from scipy.fft import fft2, ifft2, fftshift, ifftshift
-from scipy.ndimage import gaussian_filter
-from scipy.signal import windows
-from scipy.interpolate import griddata
+from shared_data import survey_df, survey_xi, survey_yi, survey_zi, dx_survey, dy_survey, decl, incl, add_observatory_markers
+from shared_data import create_data_mask, extrapolate_nans, apply_mask_to_data, reduction_to_pole_improved
 
-# Load data
-df = pd.read_csv('data/magnetometria2.csv')
-df.set_index('station', inplace=True)
+# Use the pre-loaded data from shared_data.py
+df = survey_df
 
-# Extract coordinates and values from df
-x = df['Longitude'].values
-y = df['Latitude'].values
-z = df['B(nT)'].values
+# Use the pre-calculated grid data from shared_data.py
+xi = survey_xi
+yi = survey_yi
+tf = survey_zi
 
-# Create a regular grid
-xi = np.linspace(x.min(), x.max(), 100)
-yi = np.linspace(y.min(), y.max(), 100)
-xi, yi = np.meshgrid(xi, yi)
-
-# Constants for the derivative, dx != dy at Earth's surface (it is a Geoid)
-Delta_x = 106e3   # m/deg  in N-S
-Delta_y = 110e3   # m/deg  in E-W
-
-dx = Delta_x * abs(x.max()-x.min()) / len(xi)
-dy = Delta_y * abs(y.max()-y.min()) / len(yi)
-
-# Interpolate using simple linear interpolation (more robust)
-tf = griddata((x, y), z, (xi, yi), method='linear')
-
-decl = -11.37
-incl = -40.3
-
-def create_data_mask(data, threshold=1e-10):
-    """
-    Create a mask for non-null data points.
-    Returns a boolean mask where True indicates valid (non-null) data points.
-    """
-    # Create mask for non-NaN and non-zero values
-    non_nan_mask = ~np.isnan(data)
-    
-    # For the original data, also exclude near-zero values if they represent gaps
-    non_zero_mask = np.abs(data) > threshold
-    
-    # Combine masks
-    valid_mask = non_nan_mask & non_zero_mask
-    
-    return valid_mask
-
-def extrapolate_nans(data):
-    """
-    Extrapolate NaN values in a 2D array using nearest neighbor interpolation.
-    """
-    if not np.isnan(data).any():
-        return data
-    
-    data_extrapolated = data.copy()
-    ny, nx = data.shape
-    
-    # Create coordinate arrays
-    x_coords, y_coords = np.meshgrid(np.arange(nx), np.arange(ny))
-    
-    # Get valid (non-NaN) points
-    valid_mask = ~np.isnan(data)
-    valid_points = np.column_stack((x_coords[valid_mask], y_coords[valid_mask]))
-    valid_values = data[valid_mask]
-    
-    # Get NaN points
-    nan_points = np.column_stack((x_coords[~valid_mask], y_coords[~valid_mask]))
-    
-    if len(nan_points) > 0:
-        # Use nearest neighbor interpolation for NaN points
-        from scipy.interpolate import NearestNDInterpolator
-        interpolator = NearestNDInterpolator(valid_points, valid_values)
-        nan_values = interpolator(nan_points)
-        
-        # Fill NaN values
-        data_extrapolated[~valid_mask] = nan_values
-    
-    return data_extrapolated
-
-def apply_mask_to_data(data, mask, fill_value=np.nan):
-    """
-    Apply mask to data, setting masked values to fill_value.
-    """
-    masked_data = data.copy()
-    masked_data[~mask] = fill_value
-    return masked_data
-
-def apply_tukey_tapering(data, alpha=0.2):
-    """
-    Apply Tukey 2D window to reduce edge effects with larger tapering.
-    """
-    ny, nx = data.shape
-    # Create 1D Tukey windows
-    window_x = windows.tukey(nx, alpha)
-    window_y = windows.tukey(ny, alpha)
-    
-    # Create 2D window
-    window_2d = np.outer(window_y, window_x)
-    
-    # Apply window to data
-    return data * window_2d
-
-def create_wiener_filter(kx, ky, noise_level=1e-3, signal_level=1.0):
-    """
-    Create Wiener filter for stabilization in frequency domain.
-    """
-    k_squared = kx**2 + ky**2
-    k = np.sqrt(k_squared)
-    
-    # Avoid division by zero
-    k_squared[k_squared == 0] = 1e-10
-    
-    # Wiener filter: signal/(signal + noise)
-    # For magnetic data, noise increases with frequency
-    signal_power = signal_level / (1 + k_squared)
-    noise_power = noise_level * k_squared
-    
-    wiener_filter = signal_power / (signal_power + noise_power)
-    
-    return wiener_filter
-
-def reduction_to_pole_improved(tf, dx, dy, inc, dec, 
-                              apply_tapering=True, 
-                              apply_wiener_filter=True,
-                              wiener_noise_level=1e-4,
-                              apply_smoothing=True,
-                              sigma=0.8,
-                              alpha=0.2):
-    """
-    Improved RTP with better stabilization and filtering.
-    """
-    # First, extrapolate any NaN values
-    tf_clean = extrapolate_nans(tf)
-    
-    # Remove regional field to work with anomalies
-    regional_field = np.nanmean(tf_clean)
-    tf_anomaly = tf_clean - regional_field
-    
-    print(f"Regional field: {regional_field:.1f} nT")
-    print(f"Anomaly range: {np.nanmin(tf_anomaly):.1f} to {np.nanmax(tf_anomaly):.1f} nT")
-    
-    # Apply tapering to reduce edge effects
-    if apply_tapering:
-        tf_processed = apply_tukey_tapering(tf_anomaly, alpha=alpha)
-    else:
-        tf_processed = tf_anomaly.copy()
-    
-    # Convert angles to radians
-    inc_rad = np.deg2rad(inc)
-    dec_rad = np.deg2rad(dec)
-    
-    # Grid dimensions
-    ny, nx = tf_processed.shape
-    
-    # Calculate spatial frequencies (rad/m)
-    kx = 2 * np.pi * np.fft.fftfreq(nx, dx)
-    ky = 2 * np.pi * np.fft.fftfreq(ny, dy)
-    
-    # Create frequency meshes
-    Kx, Ky = np.meshgrid(kx, ky)
-    K_squared = Kx**2 + Ky**2
-    K = np.sqrt(K_squared)
-    
-    # Avoid division by zero
-    K_squared[K_squared == 0] = 1e-10
-    
-    # Direction cosines for geomagnetic field
-    X0 = np.cos(inc_rad) * np.cos(dec_rad)
-    Y0 = np.cos(inc_rad) * np.sin(dec_rad) 
-    Z0 = np.sin(inc_rad)
-    
-    # Direction cosines for pole (vertical magnetization)
-    Xp = 0.0  # At pole, field is vertical
-    Yp = 0.0
-    Zp = 1.0
-    
-    # Calculate the RTP filter with stabilization
-    with np.errstate(divide='ignore', invalid='ignore'):
-        # Original field direction filter
-        F_original = 1j * (X0 * Kx + Y0 * Ky) - Z0 * K
-        # Pole direction filter  
-        F_pole = 1j * (Xp * Kx + Yp * Ky) - Zp * K
-        
-        # RTP filter
-        rtp_filter = F_pole / F_original
-        
-        # Apply stabilization to avoid extreme values
-        max_filter_magnitude = 10.0  # Limit filter amplification
-        filter_magnitude = np.abs(rtp_filter)
-        rtp_filter = np.where(filter_magnitude > max_filter_magnitude, 
-                             rtp_filter * max_filter_magnitude / filter_magnitude, 
-                             rtp_filter)
-        
-        # Handle remaining invalid values
-        rtp_filter = np.nan_to_num(rtp_filter, nan=1.0, posinf=1.0, neginf=1.0)
-    
-    # Apply Wiener filter for additional stabilization
-    if apply_wiener_filter:
-        wiener_filter = create_wiener_filter(Kx, Ky, noise_level=wiener_noise_level)
-        rtp_filter = rtp_filter * wiener_filter
-    
-    # FFT of processed data
-    tf_fft = fft2(tf_processed)
-    
-    # Apply the stabilized RTP filter
-    rtp_fft = tf_fft * rtp_filter
-    
-    # Inverse FFT to real space
-    rtp_anomaly = np.real(ifft2(rtp_fft))
-    
-    # Add back the regional field
-    rtp_result = rtp_anomaly + regional_field
-    
-    # Apply Gaussian smoothing if enabled
-    if apply_smoothing:
-        rtp_result = gaussian_filter(rtp_result, sigma=sigma)
-    
-    return rtp_result
-
-def process_magnetic_data_improved(data, dx, dy, inc, dec, **kwargs):
-    """
-    Improved main function for processing magnetic data with RTP.
-    """
-    return reduction_to_pole_improved(data, dx, dy, inc, dec, **kwargs)
+# Use pre-calculated grid spacing from shared_data.py
+dx = dx_survey
+dy = dy_survey
 
 # Check for NaN values before processing
 print(f"NaN values in original tf: {np.isnan(tf).sum()}")
 print(f"Original data range: {np.nanmin(tf):.1f} to {np.nanmax(tf):.1f} nT")
 print(f"Original data mean: {np.nanmean(tf):.1f} nT")
 
-# Create mask for non-null data points
+# Create mask for non-null data points using shared function
 data_mask = create_data_mask(tf)
 print(f"Valid data points: {np.sum(data_mask)} out of {tf.size}")
 
-# Extrapolate NaNs with nearest neighbours algorithm
+# Extrapolate NaNs with nearest neighbours algorithm using shared function
 tf_clean = extrapolate_nans(tf)
 
-# Improved reduction to pole calculation with better parameters
-tf_red_improved = process_magnetic_data_improved(
+# Improved reduction to pole calculation with better parameters using shared function
+tf_red_improved = reduction_to_pole_improved(
     tf_clean, dx, dy, incl, decl,
     apply_tapering=True,
     apply_wiener_filter=True,
@@ -255,13 +43,13 @@ tf_red_improved = process_magnetic_data_improved(
 print(f"Improved reduced data range: {np.nanmin(tf_red_improved):.1f} to {np.nanmax(tf_red_improved):.1f} nT")
 print(f"Improved reduced data mean: {np.nanmean(tf_red_improved):.1f} nT")
 
-# Apply mask to reduced field for display
+# Apply mask to reduced field for display using shared function
 tf_red_masked_improved = apply_mask_to_data(tf_red_improved, data_mask)
 
 # Calculate RMS error (using cleaned data for comparison)
 tf_err_improved = tf_clean - tf_red_improved
 
-# Apply mask to error for display
+# Apply mask to error for display using shared function
 tf_err_masked_improved = apply_mask_to_data(tf_err_improved, data_mask)
 
 # Calculate RMS error only on valid data points
@@ -275,12 +63,6 @@ xx, yy = np.meshgrid(xi[0], yi[:,0])
 
 # plotting gridded data
 def create_grid_plot():
-    # Coordinates for markers
-    observatory_lat = -34.33344
-    observatory_lon = -54.71229
-    sensor_hut_lat = -34.33306
-    sensor_hut_lon = -54.71218
-    
     # Create figure for reduced field
     fig = go.Figure()
     
@@ -317,28 +99,21 @@ def create_grid_plot():
         )
     )
     
-    # Add Observatory Building marker
+    # Add original data points for context
     fig.add_trace(
         go.Scatter(
-            x=[observatory_lon],
-            y=[observatory_lat],
-            mode='markers+text',
+            x=df['Longitude (deg)'],
+            y=df['Latitude (deg)'],
+            mode='markers',
             marker=dict(
-                size=12,
-                color='white',
-                symbol='square',
-                line=dict(width=2, color='black')
+                size=3,
+                color='red',
+                symbol='circle',
+                line=dict(width=1, color='white')
             ),
-            text=['Observatory'],
-            textposition='top center',
-            textfont=dict(
-                size=12,
-                color='white',
-                family='Arial, bold'
-            ),
-            name='Observatory Building',
+            name='Measurement Points',
             hovertemplate=(
-                '<b>Observatory Building</b><br>' +
+                '<b>Measurement Point</b><br>' +
                 'Longitude: %{x:.6f}°<br>' +
                 'Latitude: %{y:.6f}°<br>' +
                 '<extra></extra>'
@@ -347,35 +122,8 @@ def create_grid_plot():
         )
     )
     
-    # Add Sensor Hut marker
-    fig.add_trace(
-        go.Scatter(
-            x=[sensor_hut_lon],
-            y=[sensor_hut_lat],
-            mode='markers+text',
-            marker=dict(
-                size=12,
-                color='yellow',
-                symbol='circle',
-                line=dict(width=2, color='black')
-            ),
-            text=['Sensor Hut'],
-            textposition='top center',
-            textfont=dict(
-                size=12,
-                color='yellow',
-                family='Arial, bold'
-            ),
-            name='Sensor Hut',
-            hovertemplate=(
-                '<b>Sensor Hut</b><br>' +
-                'Longitude: %{x:.6f}°<br>' +
-                'Latitude: %{y:.6f}°<br>' +
-                '<extra></extra>'
-            ),
-            showlegend=False
-        )
-    )
+    # Add observatory and sensor hut markers using shared function
+    fig = add_observatory_markers(fig)
     
     # Configure layout for reduced field
     fig.update_layout(
@@ -487,8 +235,8 @@ def create_error_map():
     # Add original data points as reference
     fig.add_trace(
         go.Scatter(
-            x=x,
-            y=y,
+            x=df['Longitude (deg)'],
+            y=df['Latitude (deg)'],
             mode='markers',
             marker=dict(
                 size=3,
@@ -539,9 +287,10 @@ def create_error_map():
 
 layout = html.Div([
     html.H2("Reduction to the Pole (RTP)", className="mb-4"),
-    dcc.Markdown(r"""This tab shows the magnetic data after **improved** reduction to the pole transformation. 
+    dcc.Markdown(r"""This tab shows the magnetic data after apply an **improved reduction to the pole transformation**. 
            The enhanced algorithm includes better stabilization and filtering to produce more realistic magnetic field values.
-           This technique maintains the regional magnetic field while transforming anomalies, resulting in more physically realistic results."""),
+           This technique maintains the regional magnetic field while transforming anomalies, resulting in more physically 
+           accurate results."""),
     
     dbc.Row([
         dbc.Col([
@@ -556,8 +305,8 @@ layout = html.Div([
 - **Optimized smoothing** to preserve geological features."""),
                     html.P(html.Strong('RTP Summary')),              
                     html.Ul([
-                        html.Li("Inclination: -40.3° "),
-                        html.Li("Declination: -11.37° "),
+                        html.Li(f"Inclination: {incl}°"),
+                        html.Li(f"Declination: {decl}°"),
                         html.Li(f"Original field range: {np.nanmin(tf):.1f} to {np.nanmax(tf):.1f} nT"),
                         html.Li(f"Reduced field range: {np.nanmin(tf_red_improved):.1f} to {np.nanmax(tf_red_improved):.1f} nT"),
                         html.Li(f"Regional field preserved: {np.nanmean(tf):.1f} nT"),
