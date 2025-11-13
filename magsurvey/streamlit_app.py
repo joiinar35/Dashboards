@@ -16,7 +16,7 @@ st.set_page_config(
 
 # Load custom CSS from assets folder
 def load_css():
-    css_url = "
+    css_url = 'https://raw.githubusercontent.com/joiinar35/Dashboards/main/magsurvey/assets/style.css'
     try:
         with open(css_url, 'r') as f:
             st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
