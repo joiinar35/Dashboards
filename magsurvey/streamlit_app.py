@@ -104,6 +104,27 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+# Sidebar navigation with custom buttons
+st.sidebar.markdown('<div class="sidebar-title">Magnetic Survey Analysis</div>', unsafe_allow_html=True)
+
+# Navigation buttons
+col1, col2, col3 = st.sidebar.columns(3)
+
+with col1:
+    if st.button("📊 Survey", use_container_width=True, 
+                type="primary" if st.session_state.current_page == "Survey Data" else "secondary"):
+        st.session_state.current_page = "Survey Data"
+
+with col2:
+    if st.button("🧲 Gradients", use_container_width=True,
+                type="primary" if st.session_state.current_page == "Magnetic Gradients" else "secondary"):
+        st.session_state.current_page = "Magnetic Gradients"
+
+with col3:
+    if st.button("🎯 RTP", use_container_width=True,
+                type="primary" if st.session_state.current_page == "Reduction to the Pole" else "secondary"):
+        st.session_state.current_page = "Reduction to the Pole"
+
 # Sidebar navigation
 st.sidebar.title("Magnetic Survey Analysis")
 page = st.sidebar.radio("Navigate to:", [
