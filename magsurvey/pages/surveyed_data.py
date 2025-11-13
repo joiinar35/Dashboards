@@ -78,7 +78,7 @@ def create_grid_plot():
             text='<b>Magnetic Field (Total Intensity)</b>',
             x=0.5,
             font=dict(size=16)),
-        height=600,
+        height=800,
         showlegend=False,
         margin=dict(t=30, b=60, l=60, r=80),
     )
