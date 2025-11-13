@@ -16,8 +16,9 @@ st.set_page_config(
 
 # Load custom CSS from assets folder
 def load_css():
+    css_url = "
     try:
-        with open('assets/style.css', 'r') as f:
+        with open(css_url, 'r') as f:
             st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
     except FileNotFoundError:
         # Fallback CSS if file doesn't exist
