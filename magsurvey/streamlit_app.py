@@ -48,6 +48,10 @@ def load_css():
 # Load the CSS
 load_css()
 
+# Initialize session state for page navigation
+if 'current_page' not in st.session_state:
+    st.session_state.current_page = "Survey Data"
+
 # Import page rendering functions
 try:
     from pages.surveyed_data import render_survey_data
@@ -58,16 +62,105 @@ except ImportError as e:
     st.error(f"Error importing pages: {e}")
     PAGES_AVAILABLE = False
 
-# Sidebar navigation
-st.sidebar.title("Magnetic Survey Analysis")
-page = st.sidebar.radio("Navigate to:", [
-    "Survey Data", 
-    "Magnetic Gradients", 
-    "Reduction to the Pole"
-])
+# Custom CSS for the tab buttons
+st.markdown("""
+<style>
+.tab-button {
+    width: 100%;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: #FFF9C4;
+    color: #2c3e50;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.tab-button:hover {
+    background-color: #FFF59D;
+    transform: translateY(-2px);
+    border-color: #FBC02D;
+}
+
+.tab-button.active {
+    background: linear-gradient(90deg, #1d2a3a 0%, #1d2a3a 100%);
+    color: #0FD6A8;
+    box-shadow: 0 6px 16px rgba(15, 214, 168, 0.4);
+    border: 2px solid #0FD6A8;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-title {
+    color: white !important;
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Sidebar navigation with custom buttons
+st.sidebar.markdown('<div class="sidebar-title">Magnetic Survey Analysis</div>', unsafe_allow_html=True)
+
+# Navigation buttons
+col1, col2, col3 = st.sidebar.columns(3)
+
+with col1:
+    if st.button("📊 Survey", use_container_width=True, 
+                type="primary" if st.session_state.current_page == "Survey Data" else "secondary"):
+        st.session_state.current_page = "Survey Data"
+
+with col2:
+    if st.button("🧲 Gradients", use_container_width=True,
+                type="primary" if st.session_state.current_page == "Magnetic Gradients" else "secondary"):
+        st.session_state.current_page = "Magnetic Gradients"
+
+with col3:
+    if st.button("🎯 RTP", use_container_width=True,
+                type="primary" if st.session_state.current_page == "Reduction to the Pole" else "secondary"):
+        st.session_state.current_page = "Reduction to the Pole"
+
+# Alternative: Using custom HTML buttons for more styling control
+st.sidebar.markdown("---")
+st.sidebar.markdown("### Navigation")
+
+# Create custom buttons using HTML
+pages = [
+    ("Survey Data", "📊"),
+    ("Magnetic Gradients", "🧲"), 
+    ("Reduction to the Pole", "🎯")
+]
+
+for page_name, icon in pages:
+    is_active = st.session_state.current_page == page_name
+    button_class = "tab-button active" if is_active else "tab-button"
+    
+    button_html = f"""
+    <button class="{button_class}" onclick="window.parent.postMessage({{'type': 'streamlit:setComponentValue', 'key': 'nav_{page_name}'}}, '*');">
+        {icon} {page_name}
+    </button>
+    """
+    
+    st.sidebar.markdown(button_html, unsafe_allow_html=True)
+    
+    # Add click handler
+    if st.sidebar.button(f"Select {page_name}", key=f"nav_{page_name}", 
+                        use_container_width=True, 
+                        type="primary" if is_active else "secondary",
+                        label_visibility="collapsed"):
+        st.session_state.current_page = page_name
 
 # Main content based on selected page
-if page == "Survey Data":
+current_page = st.session_state.current_page
+
+if current_page == "Survey Data":
     if PAGES_AVAILABLE:
         render_survey_data()
     else:
@@ -135,7 +228,7 @@ if page == "Survey Data":
         st.plotly_chart(fig, use_container_width=True)
         st.caption("Red markers show actual survey station locations")
 
-elif page == "Magnetic Gradients":
+elif current_page == "Magnetic Gradients":
     if PAGES_AVAILABLE:
         render_magnetic_gradients()
     else:
@@ -143,7 +236,7 @@ elif page == "Magnetic Gradients":
         st.info("Magnetic gradients analysis would go here...")
         st.warning("Please make sure the 'pages/magnetic_gradients.py' file exists and is properly configured.")
 
-elif page == "Reduction to the Pole":
+elif current_page == "Reduction to the Pole":
     if PAGES_AVAILABLE:
         render_reduction_to_pole()
     else:
