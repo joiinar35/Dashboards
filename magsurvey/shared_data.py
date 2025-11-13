@@ -12,7 +12,7 @@ gradiometer_data = 'https://github.com/joiinar35/Dashboards/blob/6dc680ddae492d2
 # Load all datasets
 def load_survey_data():
     """Load main survey data"""
-    df = pd.read_csv(magnetometer_data)
+    df = pd.read_csv("data/magnetometria2.csv")
     df.set_index('station', inplace=True)
     df = df.rename(columns={
         'Latitude': 'Latitude (deg)',
@@ -22,7 +22,7 @@ def load_survey_data():
 
 def load_gradiometer_data():
     """Load gradiometer data"""
-    gdf = pd.read_csv(gradiometer_data)
+    gdf = pd.read_csv("/data/gradiometria.csv")
     gdf = gdf.iloc[:, [0, 1, 3, 4, 5]]  # Select relevant columns
     return gdf
 
