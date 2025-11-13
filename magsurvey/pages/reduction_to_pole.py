@@ -103,7 +103,7 @@ def render_reduction_to_pole():
             )
         )
         
-        fig_error.update_layout(height=500)
+        fig_error.update_layout(height=600)
         st.plotly_chart(fig_error, use_container_width=True)
     
     st.markdown("---")
@@ -141,5 +141,5 @@ def render_reduction_to_pole():
     )
     
     fig_reduced = add_observatory_markers(fig_reduced)
-    fig_reduced.update_layout(height=600, title="Reduced to Pole Magnetic Field")
+    fig_reduced.update_layout(height=1000, title="Reduced to Pole Magnetic Field")
     st.plotly_chart(fig_reduced, use_container_width=True)
