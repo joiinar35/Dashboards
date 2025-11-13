@@ -1,12 +1,9 @@
-from dash import dcc, html, dash_table
-import dash_bootstrap_components as dbc
+# pages/surveyed_data.py
+import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 from shared_data import survey_df, survey_xi, survey_yi, survey_zi, add_observatory_markers
-
-# Use the pre-loaded data from shared_data.py
-df = survey_df
 
 def create_grid_plot():
     """Create grid plot using shared data and functions"""
@@ -56,8 +53,8 @@ def create_grid_plot():
     # Add original data points
     fig.add_trace(
         go.Scatter(
-            x=df['Longitude (deg)'],
-            y=df['Latitude (deg)'],
+            x=survey_df['Longitude (deg)'],
+            y=survey_df['Latitude (deg)'],
             mode='markers',
             marker=dict(
                 size=8,
@@ -67,7 +64,7 @@ def create_grid_plot():
             ),
             name='Survey Stations',
             text=[f'Station: {idx}<br>Longitude: {x:.5f}°<br>Latitude: {y:.5f}°<br>B: {z:.1f} nT' 
-                  for idx, x, y, z in zip(df.index, df['Longitude (deg)'], df['Latitude (deg)'], df['B(nT)'])],
+                  for idx, x, y, z in zip(survey_df.index, survey_df['Longitude (deg)'], survey_df['Latitude (deg)'], survey_df['B(nT)'])],
             hovertemplate='%{text}<extra></extra>'
         )
     )
@@ -81,99 +78,50 @@ def create_grid_plot():
             text='<b>Magnetic Field (Total Intensity)</b>',
             x=0.5,
             font=dict(size=16)),
-        height=1000,
+        height=600,
         showlegend=False,
         margin=dict(t=30, b=60, l=60, r=80),
     )
     
     return fig
 
-layout = html.Div([
-    html.H2("Survey Data", className="mb-4"),
+def render_survey_data():
+    """Render the survey data page"""
+    st.markdown('<h1 class="main-header">Survey Data</h1>', unsafe_allow_html=True)
     
-    dbc.Row([
-        dbc.Col([
-            dbc.Card([
-                dbc.CardHeader("Data Summary"),
-                dbc.CardBody([
-                    html.P(f"Total Stations: {len(df)}"),
-                    html.P(f"Magnetic Field Range: {df['B(nT)'].min():.1f} - {df['B(nT)'].max():.1f} nT"),
-                    html.P(f"Latitude Range: {df['Latitude (deg)'].min():.5f} - {df['Latitude (deg)'].max():.5f}°"),
-                    html.P(f"Longitude Range: {df['Longitude (deg)'].min():.5f} - {df['Longitude (deg)'].max():.5f}°"),
-                ])
-            ])
-        ], width=4),
-        
-        dbc.Col([
-            dbc.Card([
-                dbc.CardHeader("Survey Details"),
-                dbc.CardBody([
-                    dcc.Markdown(r""" **The Problem:**    
-                            Magnetic survey of a property of approximately one hectare to
-                            evaluate the feasibility of installing a magnetic station on the site.
-                            We analyze data from unevenly spaced data points along the study area.
-                           The datasets includes a simple magnetic survey plus a gradiometric survey.  
-                           The survey was performed with a portable proton magnetometer and the
-                           gradiometric one with two vertically stacked Overhauser sensors at 1m of separation""")
-                ])
-            ])
-        ], width=8),
-    ]),
+    # Data Summary and Survey Details in columns
+    col1, col2 = st.columns([1, 2])
     
-    html.Br(),
+    with col1:
+        st.subheader("📊 Data Summary")
+        st.markdown(f"""
+        <div class="metric-card">
+            <b>Total Stations:</b> {len(survey_df)}<br>
+            <b>Magnetic Field Range:</b> {survey_df['B(nT)'].min():.1f} - {survey_df['B(nT)'].max():.1f} nT<br>
+            <b>Latitude Range:</b> {survey_df['Latitude (deg)'].min():.5f} - {survey_df['Latitude (deg)'].max():.5f}°<br>
+            <b>Longitude Range:</b> {survey_df['Longitude (deg)'].min():.5f} - {survey_df['Longitude (deg)'].max():.5f}°
+        </div>
+        """, unsafe_allow_html=True)
     
-    dbc.Row([
-        dbc.Col([
-            dbc.Card([
-                dbc.CardHeader("Data Table"),
-                dbc.CardBody([
-                    dash_table.DataTable(
-                        data=df.reset_index().to_dict('records'),
-                        columns=[{"name": i, "id": i} for i in df.reset_index().columns],
-                        page_size=10,
-                        style_table={'overflowX': 'auto'},
-                        style_cell={
-                            'textAlign': 'left',
-                            'padding': '8px',
-                            'minWidth': '100px'
-                        },
-                        style_header={
-                            'backgroundColor': 'rgb(230, 230, 230)',
-                            'fontWeight': 'bold'
-                        },
-                        style_data_conditional=[
-                            {
-                                'if': {'column_id': 'B(nT)'},
-                                'backgroundColor': 'rgb(240, 240, 240)',
-                                'fontWeight': 'bold'
-                            }
-                        ]
-                    )
-                ])
-            ])
-        ])
-    ]),
+    with col2:
+        st.subheader("🔍 Survey Details")
+        st.markdown("""
+        **The Problem:**    
+        Magnetic survey of a property of approximately one hectare to evaluate the feasibility 
+        of installing a magnetic station on the site. We analyze data from unevenly spaced data 
+        points along the study area. The datasets includes a simple magnetic survey plus a 
+        gradiometric survey. The survey was performed with a portable proton magnetometer and 
+        the gradiometric one with two vertically stacked Overhauser sensors at 1m of separation.
+        """)
     
-    html.Br(),
+    st.markdown("---")
     
-    dbc.Row([
-        dbc.Col([
-            dbc.Card([
-                dbc.CardHeader("Magnetic Field Grid Plot"),
-                dbc.CardBody([
-                    dcc.Graph(
-                        figure=create_grid_plot(), 
-                        style={
-                            'display': 'block',
-                            'margin-left': 'auto',
-                            'margin-right': 'auto',
-                            'width': '100%'
-                        }
-                    ),
-                    html.P("Red markers show actual survey station locations", 
-                          style={'textAlign': 'center', 'fontStyle': 'italic', 'color': 'red', 'marginTop': '10px'})
-                ])
-            ])
-        ])
-    ])
-])
+    # Data Table
+    st.subheader("📋 Data Table")
+    st.dataframe(survey_df, use_container_width=True)
+    
+    # Grid Plot
+    st.subheader("🗺️ Magnetic Field Grid Plot")
+    fig = create_grid_plot()
+    st.plotly_chart(fig, use_container_width=True)
+    st.caption("🔴 Red markers show actual survey station locations")
