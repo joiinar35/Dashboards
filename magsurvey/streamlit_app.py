@@ -59,6 +59,51 @@ except ImportError as e:
     st.error(f"Error importing pages: {e}")
     PAGES_AVAILABLE = False
 
+# Custom CSS for the tab buttons
+st.markdown("""
+<style>
+.tab-button {
+    width: 100%;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: #FFF9C4;
+    color: #2c3e50;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.tab-button:hover {
+    background-color: #FFF59D;
+    transform: translateY(-2px);
+    border-color: #FBC02D;
+}
+
+.tab-button.active {
+    background: linear-gradient(90deg, #1d2a3a 0%, #1d2a3a 100%);
+    color: #0FD6A8;
+    box-shadow: 0 6px 16px rgba(15, 214, 168, 0.4);
+    border: 2px solid #0FD6A8;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-title {
+    color: white !important;
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
 # Sidebar navigation
 st.sidebar.title("Magnetic Survey Analysis")
 page = st.sidebar.radio("Navigate to:", [
