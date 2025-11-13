@@ -1,187 +1,257 @@
-/* Custom styles for Dash application */
-body {
-    background: #f0f0f0;
-    background-size: cover;
-    background-attachment: fixed;
-    background-position: center;
+/* Custom styles for Streamlit application */
+/* assets/style.css */
+
+/* Main body styling */
+.stApp {
+    background: #f0f0f0 !important;
+    background-size: cover !important;
+    background-attachment: fixed !important;
+    background-position: center !important;
     margin: 0;
     padding: 0;
     min-height: 100vh;
 }
 
 /* Ensure content is readable over the background */
-.dash-content {
-    background-color: rgba(255, 255, 255, 0.95);
-    border-radius: 12px;
-    margin: 20px;
-    padding: 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+.main .block-container {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    border-radius: 12px !important;
+    margin: 20px !important;
+    padding: 20px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
 }
 
-
-/* Main layout styling */
-.bg-light {
+/* Sidebar styling */
+.css-1d391kg, 
+.css-1lcbmhc, 
+[data-testid="stSidebar"] {
     background: linear-gradient(135deg, #1d2a3a 0%, #1d2a3a 100%) !important;
-    border-right: 1px solid #34495e;
-    color: white;
+    border-right: 1px solid #34495e !important;
+    color: white !important;
 }
 
-/* Title styling */
-.text-center {
+/* Title styling in sidebar */
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 {
     color: white !important;
-    font-weight: 700;
-    font-size: 1.5rem;
-    margin-bottom: 2rem;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    font-weight: 700 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
 }
 
 /* Card header gradient styling */
-.card-header {
+.css-1r6slb0, /* Streamlit cards */
+.stCard {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    margin-bottom: 1.5rem !important;
+    transition: all 0.3s ease !important;
+    overflow: hidden !important;
+}
+
+.css-1r6slb0:hover,
+.stCard:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Card header specific styling */
+.css-1r6slb0 > header,
+.stCard > header {
     background: linear-gradient(90deg, #1d2a3a 0%, #1d2a3a 50%, #00b4db 100%) !important;
     color: white !important;
-    font-weight: 600;
-    border-bottom: none;
-    padding: 1rem 1.25rem;
+    font-weight: 600 !important;
+    border-bottom: none !important;
+    padding: 1rem 1.25rem !important;
 }
 
 /* Card body styling */
-.card-body {
-    background-color: #f8f9fa;
-    border-radius: 0 0 12px 12px;
+.css-1r6slb0 > div:not(header),
+.stCard > div:not(header) {
+    background-color: #f8f9fa !important;
+    border-radius: 0 0 12px 12px !important;
+    padding: 1rem !important;
 }
 
-/* Card overall styling */
-.card {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    border: none;
-    border-radius: 12px;
-    margin-bottom: 1.5rem;
-    transition: all 0.3s ease;
-    overflow: hidden;
-}
-
-.card:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-    transform: translateY(-2px);
-}
-
-/* Tab styling - UPDATED */
-.custom-tab {
+/* Radio button styling (for navigation) */
+.st-bb, /* Radio button container */
+.st-bd, /* Selected radio button */
+.st-be  /* Radio button label */
+{
     background-color: #FFF9C4 !important;
-    border: none;
-    border-radius: 8px;
-    padding: 14px 18px;
-    margin-bottom: 10px;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 14px 18px !important;
+    margin-bottom: 10px !important;
     color: #2c3e50 !important;
     font-weight: 700 !important;
     font-size: 1.1rem !important;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    border: 2px solid transparent;
+    transition: all 0.3s ease !important;
+    cursor: pointer !important;
+    border: 2px solid transparent !important;
 }
 
-.custom-tab:hover {
+.st-bb:hover,
+.st-be:hover {
     background-color: #FFF59D !important;
-    transform: translateY(-2px);
+    transform: translateY(-2px) !important;
     color: #2c3e50 !important;
-    border-color: #FBC02D;
+    border-color: #FBC02D !important;
 }
 
-.custom-tab--selected {
-    background: linear-gradient(90deg, #1d2a3a 0%, #1d2a3a 100%);
+/* Selected radio button */
+.st-bd {
+    background: linear-gradient(90deg, #1d2a3a 0%, #1d2a3a 100%) !important;
     color: #0FD6A8 !important;
     font-weight: 700 !important;
     font-size: 1.1rem !important;
-    box-shadow: 0 6px 16px rgba(15, 214, 168, 0.4);
-    border: 2px solid #0FD6A8;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 16px rgba(15, 214, 168, 0.4) !important;
+    border: 2px solid #0FD6A8 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
 }
 
 /* Graph container styling */
-.dcc-graph {
-    border-radius: 8px;
-    overflow: hidden;
+[data-testid="stPlotlyChart"],
+.element-container .stPlotlyChart {
+    border-radius: 8px !important;
+    overflow: hidden !important;
 }
 
 /* List styling in cards */
-.card-body ul {
-    padding-left: 1rem;
+.css-1r6slb0 ul,
+.stCard ul {
+    padding-left: 1rem !important;
 }
 
-.card-body li {
-    margin-bottom: 0.5rem;
-    color: #2c3e50;
+.css-1r6slb0 li,
+.stCard li {
+    margin-bottom: 0.5rem !important;
+    color: #2c3e50 !important;
 }
 
 /* Text color adjustments for dark sidebar */
-.bg-light .text-muted {
+[data-testid="stSidebar"] .stMarkdown,
+[data-testid="stSidebar"] .stText {
     color: #bdc3c7 !important;
 }
 
 /* Button styling adjustments */
-.btn-primary {
-    background: linear-gradient(90deg, #1d2a3a 0%, #00b4db 100%);
-    border: none;
-    border-radius: 6px;
-    font-weight: 600;
-    font-size: 1rem;
+.stButton button,
+.stDownloadButton button {
+    background: linear-gradient(90deg, #1d2a3a 0%, #00b4db 100%) !important;
+    border: none !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    color: white !important;
 }
 
-.btn-primary:hover {
-    background: linear-gradient(90deg, #1d2a3a 0%, #0099cc 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 180, 219, 0.3);
+.stButton button:hover,
+.stDownloadButton button:hover {
+    background: linear-gradient(90deg, #1d2a3a 0%, #0099cc 100%) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(0, 180, 219, 0.3) !important;
 }
 
 /* Custom scrollbar for sidebar */
-.bg-light::-webkit-scrollbar {
-    width: 6px;
+[data-testid="stSidebar"]::-webkit-scrollbar {
+    width: 6px !important;
 }
 
-.bg-light::-webkit-scrollbar-track {
-    background: #1d2a3a;
+[data-testid="stSidebar"]::-webkit-scrollbar-track {
+    background: #1d2a3a !important;
 }
 
-.bg-light::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #00b4db 0%, #1d2a3a 100%);
-    border-radius: 3px;
+[data-testid="stSidebar"]::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #00b4db 0%, #1d2a3a 100%) !important;
+    border-radius: 3px !important;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .bg-light {
-        border-right: none;
-        border-bottom: 1px solid #34495e;
-    }
-    
-    .card-header {
-        padding: 0.75rem 1rem;
-    }
-    
-    .custom-tab {
-        font-size: 1rem !important;
-        padding: 12px 16px;
-    }
+/* Main content headers */
+.main h1,
+.main h2,
+.main h3 {
+    color: #2c3e50 !important;
+    font-weight: 600 !important;
+}
+
+/* Metric cards styling */
+[data-testid="metric-container"],
+[data-testid="stMetric"] {
+    background-color: #f8f9fa !important;
+    padding: 1.5rem !important;
+    border-radius: 0.75rem !important;
+    border-left: 5px solid #3498db !important;
+    margin-bottom: 1rem !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* Dataframe styling */
+[data-testid="stDataFrame"],
+.dataframe {
+    border-radius: 0.5rem !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
 }
 
 /* Animation for smooth transitions */
-.card, .custom-tab, .btn {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.css-1r6slb0,
+.stCard,
+.st-bb,
+.stButton button {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* Additional visual enhancements */
+/* Additional spacing */
 .mb-4 {
     margin-bottom: 2rem !important;
 }
 
-/* Custom border radius for graphs */
+/* Plotly modebar styling */
 .js-plotly-plot .plotly .modebar {
-    border-radius: 0 0 8px 8px;
+    border-radius: 0 0 8px 8px !important;
 }
 
-/* Ensure text colors are properly applied */
-.custom-tab span {
-    color: inherit !important;
-    font-weight: inherit !important;
-    font-size: inherit !important;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    [data-testid="stSidebar"] {
+        border-right: none !important;
+        border-bottom: 1px solid #34495e !important;
+    }
+    
+    .css-1r6slb0 > header,
+    .stCard > header {
+        padding: 0.75rem 1rem !important;
+    }
+    
+    .st-bb,
+    .st-bd,
+    .st-be {
+        font-size: 1rem !important;
+        padding: 12px 16px !important;
+    }
+    
+    .main .block-container {
+        margin: 10px !important;
+        padding: 15px !important;
+    }
+}
+
+/* Custom classes for Streamlit markdown */
+.main-header {
+    font-size: 2.5rem !important;
+    color: #2c3e50 !important;
+    text-align: center !important;
+    margin-bottom: 2rem !important;
+    font-weight: 700 !important;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1) !important;
+}
+
+.metric-card {
+    background-color: #f8f9fa !important;
+    padding: 1.5rem !important;
+    border-radius: 0.75rem !important;
+    border-left: 5px solid #3498db !important;
+    margin-bottom: 1rem !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
 }
