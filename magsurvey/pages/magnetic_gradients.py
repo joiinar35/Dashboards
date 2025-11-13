@@ -120,7 +120,7 @@ def render_magnetic_gradients():
     )
     
     fig_horizontal = add_observatory_markers(fig_horizontal)
-    fig_horizontal.update_layout(height=600, title="Total Horizontal Magnetic Gradient")
+    fig_horizontal.update_layout(height=1000, title="Total Horizontal Magnetic Gradient")
     st.plotly_chart(fig_horizontal, use_container_width=True)
     
     # Vertical Gradient Plot
@@ -162,5 +162,5 @@ def render_magnetic_gradients():
     )
     
     fig_vertical = add_observatory_markers(fig_vertical)
-    fig_vertical.update_layout(height=600, title="Vertical Magnetic Gradient")
+    fig_vertical.update_layout(height=1000, title="Vertical Magnetic Gradient")
     st.plotly_chart(fig_vertical, use_container_width=True)
