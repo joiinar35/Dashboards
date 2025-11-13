@@ -178,39 +178,51 @@ def apply_mask_to_data(data, mask, fill_value=np.nan):
 
 # Common plotting utilities
 def add_observatory_markers(fig):
-    """Add observatory and sensor hut markers to plotly figure"""
-    # Observatory marker
+    """Add observatory markers to plotly figure - modified for Streamlit"""
+    # Observatory building coordinates
+    obs_lon = OBSERVATORY_LON
+    obs_lat = OBSERVATORY_LAT
+    
+    # Sensor hut coordinates  
+    hut_lon = SENSOR_HUT_LON
+    hut_lat = SENSOR_HUT_LAT
+    
+    # Add observatory building marker
     fig.add_trace(
         go.Scatter(
-            x=[OBSERVATORY_LON],
-            y=[OBSERVATORY_LAT],
-            mode='markers+text',
-            marker=dict(size=12, color='white', symbol='square', line=dict(width=2, color='black')),
-            text=['Observatory'],
-            textposition='top center',
-            textfont=dict(size=12, color='white', family='Arial, bold'),
-            name='Observatory Building',
-            hovertemplate='<b>Observatory Building</b><br>Longitude: %{x:.6f}°<br>Latitude: %{y:.6f}°<br><extra></extra>',
-            showlegend=False
+            x=[obs_lon],
+            y=[obs_lat],
+            mode='markers',
+            marker=dict(
+                size=12,
+                color='white',
+                symbol='square',
+                line=dict(width=2, color='black')
+            ),
+            name='Observatory',
+            hovertemplate='<b>Observatory Building</b><br>Longitude: -54.71229°<br>Latitude: -34.33344°<extra></extra>'
         )
     )
     
-    # Sensor hut marker
+    # Add sensor hut marker
     fig.add_trace(
         go.Scatter(
-            x=[SENSOR_HUT_LON],
-            y=[SENSOR_HUT_LAT],
-            mode='markers+text',
-            marker=dict(size=12, color='yellow', symbol='circle', line=dict(width=2, color='black')),
-            text=['Sensor Hut'],
-            textposition='top center',
-            textfont=dict(size=12, color='yellow', family='Arial, bold'),
+            x=[hut_lon],
+            y=[hut_lat],
+            mode='markers',
+            marker=dict(
+                size=10,
+                color='yellow', 
+                symbol='circle',
+                line=dict(width=2, color='black')
+            ),
             name='Sensor Hut',
-            hovertemplate='<b>Sensor Hut</b><br>Longitude: %{x:.6f}°<br>Latitude: %{y:.6f}°<br><extra></extra>',
-            showlegend=False
+            hovertemplate='<b>Sensor Hut</b><br>Longitude: -54.71218°<br>Latitude: -34.33305°<extra></extra>'
         )
     )
+    
     return fig
+
 
 # Pre-load data for all pages
 survey_df = load_survey_data()
