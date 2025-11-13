@@ -14,6 +14,40 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Load custom CSS from assets folder
+def load_css():
+    try:
+        with open('assets/style.css', 'r') as f:
+            st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+    except FileNotFoundError:
+        # Fallback CSS if file doesn't exist
+        st.markdown("""
+        <style>
+            .main-header {
+                font-size: 2.5rem;
+                color: #2c3e50;
+                text-align: center;
+                margin-bottom: 2rem;
+            }
+            .metric-card {
+                background-color: #f8f9fa;
+                padding: 1rem;
+                border-radius: 0.5rem;
+                border-left: 4px solid #3498db;
+                margin-bottom: 1rem;
+            }
+            .custom-tab {
+                background-color: #f8f9fa;
+                border-radius: 0.5rem;
+                padding: 0.5rem;
+                margin-bottom: 0.5rem;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+
+# Load the CSS
+load_css()
+
 # Sidebar navigation
 st.sidebar.title("Magnetic Survey Analysis")
 page = st.sidebar.radio("Navigate to:", [
