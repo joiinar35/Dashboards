@@ -30,13 +30,49 @@
     color: white !important;
 }
 
-/* Title styling in sidebar */
-[data-testid="stSidebar"] h1,
-[data-testid="stSidebar"] h2,
-[data-testid="stSidebar"] h3 {
+/* Custom tab buttons styling */
+.tab-button {
+    width: 100% !important;
+    padding: 14px 18px !important;
+    margin-bottom: 10px !important;
+    border: none !important;
+    border-radius: 8px !important;
+    background-color: #FFF9C4 !important;
+    color: #2c3e50 !important;
+    font-weight: 700 !important;
+    font-size: 1.1rem !important;
+    text-align: left !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    border: 2px solid transparent !important;
+    font-family: inherit !important;
+}
+
+.tab-button:hover {
+    background-color: #FFF59D !important;
+    transform: translateY(-2px) !important;
+    color: #2c3e50 !important;
+    border-color: #FBC02D !important;
+}
+
+.tab-button.active {
+    background: linear-gradient(90deg, #1d2a3a 0%, #1d2a3a 100%) !important;
+    color: #0FD6A8 !important;
+    font-weight: 700 !important;
+    font-size: 1.1rem !important;
+    box-shadow: 0 6px 16px rgba(15, 214, 168, 0.4) !important;
+    border: 2px solid #0FD6A8 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Sidebar title */
+.sidebar-title {
     color: white !important;
     font-weight: 700 !important;
+    font-size: 1.5rem !important;
+    margin-bottom: 2rem !important;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    text-align: center !important;
 }
 
 /* Card header gradient styling */
@@ -72,43 +108,6 @@
     background-color: #f8f9fa !important;
     border-radius: 0 0 12px 12px !important;
     padding: 1rem !important;
-}
-
-/* Radio button styling (for navigation) */
-.st-bb, /* Radio button container */
-.st-bd, /* Selected radio button */
-.st-be  /* Radio button label */
-{
-    background-color: #FFF9C4 !important;
-    border: none !important;
-    border-radius: 8px !important;
-    padding: 14px 18px !important;
-    margin-bottom: 10px !important;
-    color: #2c3e50 !important;
-    font-weight: 700 !important;
-    font-size: 1.1rem !important;
-    transition: all 0.3s ease !important;
-    cursor: pointer !important;
-    border: 2px solid transparent !important;
-}
-
-.st-bb:hover,
-.st-be:hover {
-    background-color: #FFF59D !important;
-    transform: translateY(-2px) !important;
-    color: #2c3e50 !important;
-    border-color: #FBC02D !important;
-}
-
-/* Selected radio button */
-.st-bd {
-    background: linear-gradient(90deg, #1d2a3a 0%, #1d2a3a 100%) !important;
-    color: #0FD6A8 !important;
-    font-weight: 700 !important;
-    font-size: 1.1rem !important;
-    box-shadow: 0 6px 16px rgba(15, 214, 168, 0.4) !important;
-    border: 2px solid #0FD6A8 !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
 }
 
 /* Graph container styling */
@@ -197,7 +196,7 @@
 /* Animation for smooth transitions */
 .css-1r6slb0,
 .stCard,
-.st-bb,
+.tab-button,
 .stButton button {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
@@ -224,9 +223,7 @@
         padding: 0.75rem 1rem !important;
     }
     
-    .st-bb,
-    .st-bd,
-    .st-be {
+    .tab-button {
         font-size: 1rem !important;
         padding: 12px 16px !important;
     }
