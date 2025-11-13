@@ -7,10 +7,12 @@ from scipy.signal import windows
 from scipy.interpolate import NearestNDInterpolator
 import plotly.graph_objects as go
 
+magnetometer_data = 'https://github.com/joiinar35/Dashboards/blob/6dc680ddae492d25074be450625608e4d54b1ab8/magsurvey/data/magnetometria2.csv'
+gradiometer_data = 'https://github.com/joiinar35/Dashboards/blob/6dc680ddae492d25074be450625608e4d54b1ab8/magsurvey/data/gradiometria.csv'
 # Load all datasets
 def load_survey_data():
     """Load main survey data"""
-    df = pd.read_csv('data/magnetometria2.csv')
+    df = pd.read_csv(magnetometer_data)
     df.set_index('station', inplace=True)
     df = df.rename(columns={
         'Latitude': 'Latitude (deg)',
@@ -20,7 +22,7 @@ def load_survey_data():
 
 def load_gradiometer_data():
     """Load gradiometer data"""
-    gdf = pd.read_csv('data/gradiometria.csv')
+    gdf = pd.read_csv(gradiometer_data)
     gdf = gdf.iloc[:, [0, 1, 3, 4, 5]]  # Select relevant columns
     return gdf
 
