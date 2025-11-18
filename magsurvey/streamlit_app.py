@@ -21,7 +21,7 @@ st.set_page_config(
 
 # Load custom CSS
 def load_css():
-    with open("assets/style.css") as f:
+    with open("./assets/style.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     
     # Additional CSS to hide default navigation menu
