@@ -202,7 +202,8 @@ def add_observatory_markers(fig):
                 line=dict(width=2, color='black')
             ),
             name='Observatory',
-            hovertemplate='<b>Observatory Building</b><br>Longitude: -54.71229°<br>Latitude: -34.33344°<extra></extra>'
+            hovertemplate='<b>Observatory Building</b><br>Longitude: -54.71229°<br>Latitude: -34.33344°<extra></extra>',
+            showlegend=True
         )
     )
     
@@ -222,6 +223,66 @@ def add_observatory_markers(fig):
             hovertemplate='<b>Sensor Hut</b><br>Longitude: -54.71218°<br>Latitude: -34.33305°<extra></extra>'
         )
     )
+    
+    return fig
+
+def add_scale_bar(fig, x_range, y_range, scale_length_meters=25):
+    """
+    Add a scale bar to the plot
+    scale_length_meters: length of the scale bar in meters
+    """
+    # Calculate approximate degrees for the scale length
+    # 1 degree latitude ≈ 111,320 meters
+    # 1 degree longitude ≈ 111,320 * cos(latitude) meters
+    lat_center = np.mean(y_range)
+    #meters_per_degree_lat = 111320
+    meters_per_degree_lon = 111320 * np.cos(np.radians(lat_center))
+    
+    scale_degrees_lon = scale_length_meters / meters_per_degree_lon
+    
+    # Position the scale bar in the top left corner
+    scale_x_start = x_range[0] + 0.00001
+    scale_x_end = x_range[0] + 0.00001 + scale_degrees_lon / 2
+    scale_y = y_range[1] - 0.0001
+    
+    # Add scale bar line (yellow color)
+    fig.add_trace(
+        go.Scatter(
+            x=[scale_x_start, scale_x_end],
+            y=[scale_y, scale_y],
+            mode='lines',
+            line=dict(color='yellow', width=5),
+            showlegend=False,
+            hoverinfo='skip'
+        )
+    )
+    
+    # Add scale bar labels (yellow text with black border for contrast)
+    fig.add_annotation(
+        x=(scale_x_start + scale_x_end) / 2,
+        y=scale_y + 0.00005,
+        text=f"{scale_length_meters} m",
+        showarrow=False,
+        font=dict(color='yellow', size=14, family='Arial Black'),
+        bgcolor='rgba(0,0,0,0.7)',
+        bordercolor='yellow',
+        borderwidth=0,
+        borderpad=4,
+        opacity=0.9
+    )
+    
+    # Add end markers (yellow)
+    for x_pos in [scale_x_start, scale_x_end]:
+        fig.add_trace(
+            go.Scatter(
+                x=[x_pos],
+                y=[scale_y],
+                mode='markers',
+                marker=dict(color='yellow', size=8, symbol='line-ns', line=dict(width=2, color='black')),
+                showlegend=False,
+                hoverinfo='skip'
+            )
+        )
     
     return fig
 
