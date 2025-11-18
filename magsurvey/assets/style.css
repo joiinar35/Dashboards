@@ -3,10 +3,7 @@
 
 /* Main body styling */
 .stApp {
-    background: #f0f0f0 !important;
-    background-size: cover !important;
-    background-attachment: fixed !important;
-    background-position: center !important;
+    background: #000000;
     margin: 0;
     padding: 0;
     min-height: 100vh;
@@ -14,241 +11,209 @@
 
 /* Ensure content is readable over the background */
 .main .block-container {
-    background-color: rgba(255, 255, 255, 0.95) !important;
-    border-radius: 12px !important;
-    margin: 20px !important;
-    padding: 20px !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+    background-color: black;
+    border-radius: 12px;
+    margin: 20px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    color: white;
 }
 
-/* Sidebar styling */
+/* Sidebar styling - without top title */
 .css-1d391kg, 
 .css-1lcbmhc, 
 [data-testid="stSidebar"] {
-    background: linear-gradient(135deg, #1d2a3a 0%, #1d2a3a 100%) !important;
-    border-right: 1px solid #34495e !important;
-    color: white !important;
+    background: linear-gradient(135deg, #1d2a3a 0%, #1d2a3a 100%);
+    border-right: 1px solid #34495e;
+    color: white;
 }
 
-/* Custom tab buttons styling */
-.tab-button {
-    width: 100% !important;
-    padding: 14px 18px !important;
-    margin-bottom: 10px !important;
-    border: none !important;
-    border-radius: 8px !important;
-    background-color: #FFF9C4 !important;
-    color: #2c3e50 !important;
-    font-weight: 700 !important;
-    font-size: 1.1rem !important;
-    text-align: left !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    border: 2px solid transparent !important;
-    font-family: inherit !important;
+/* Navigation buttons styling - INCREASED FONT SIZE AND BOLD */
+.stButton button {
+    width: 100%;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-weight: 800 !important; /* Changed to bold */
+    font-size: 1.3rem !important; /* Increased from 1.2rem */
+    text-align: left;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    background-color: #FFF9C4;
+    color: #2c3e50;
 }
 
-.tab-button:hover {
-    background-color: #FFF59D !important;
-    transform: translateY(-2px) !important;
-    color: #2c3e50 !important;
-    border-color: #FBC02D !important;
+/* Hover effect for all buttons */
+.stButton button:hover {
+    background-color: #FFF59D;
+    transform: translateY(-2px);
+    border-color: #FBC02D;
+    color: #2c3e50;
+    font-weight: 800 !important; /* Keep bold on hover */
 }
 
-.tab-button.active {
-    background: linear-gradient(90deg, #1d2a3a 0%, #1d2a3a 100%) !important;
-    color: #0FD6A8 !important;
-    font-weight: 700 !important;
-    font-size: 1.1rem !important;
-    box-shadow: 0 6px 16px rgba(15, 214, 168, 0.4) !important;
-    border: 2px solid #0FD6A8 !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+/* Active button styling */
+.stButton button[kind="primary"] {
+    background: linear-gradient(90deg, #1d2a3a 0%, #1d2a3a 100%);
+    color: #0FD6A8;
+    box-shadow: 0 6px 16px rgba(15, 214, 168, 0.4);
+    border: 2px solid #0FD6A8;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    font-weight: 800 !important; /* Bold for active button */
+    font-size: 1.3rem !important; /* Consistent size */
 }
 
-/* Sidebar title */
-.sidebar-title {
-    color: white !important;
-    font-weight: 700 !important;
-    font-size: 1.5rem !important;
-    margin-bottom: 2rem !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
-    text-align: center !important;
+/* Hover effect for active button */
+.stButton button[kind="primary"]:hover {
+    background: linear-gradient(90deg, #1d2a3a 0%, #1d2a3a 100%);
+    color: #0FD6A8;
+    border-color: #0FD6A8;
+    transform: translateY(-2px);
+    font-weight: 800 !important; /* Keep bold on hover */
 }
 
-/* Card header gradient styling */
-.css-1r6slb0, /* Streamlit cards */
-.stCard {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-    border: none !important;
-    border-radius: 12px !important;
-    margin-bottom: 1.5rem !important;
-    transition: all 0.3s ease !important;
-    overflow: hidden !important;
+/* Secondary button styling */
+.stButton button[kind="secondary"] {
+    background-color: #FFF9C4;
+    color: #2c3e50;
+    border: 2px solid transparent;
+    font-weight: 800 !important; /* Bold for secondary buttons */
+    font-size: 1.3rem !important; /* Consistent size */
 }
 
-.css-1r6slb0:hover,
-.stCard:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
-    transform: translateY(-2px) !important;
+/* Hover effect for secondary buttons */
+.stButton button[kind="secondary"]:hover {
+    font-weight: 800 !important; /* Keep bold on hover */
 }
 
-/* Card header specific styling */
-.css-1r6slb0 > header,
-.stCard > header {
-    background: linear-gradient(90deg, #1d2a3a 0%, #1d2a3a 50%, #00b4db 100%) !important;
-    color: white !important;
-    font-weight: 600 !important;
-    border-bottom: none !important;
-    padding: 1rem 1.25rem !important;
-}
-
-/* Card body styling */
-.css-1r6slb0 > div:not(header),
-.stCard > div:not(header) {
-    background-color: #f8f9fa !important;
-    border-radius: 0 0 12px 12px !important;
-    padding: 1rem !important;
-}
-
-/* Graph container styling */
-[data-testid="stPlotlyChart"],
-.element-container .stPlotlyChart {
-    border-radius: 8px !important;
-    overflow: hidden !important;
-}
-
-/* List styling in cards */
-.css-1r6slb0 ul,
-.stCard ul {
-    padding-left: 1rem !important;
-}
-
-.css-1r6slb0 li,
-.stCard li {
-    margin-bottom: 0.5rem !important;
-    color: #2c3e50 !important;
-}
-
-/* Text color adjustments for dark sidebar */
-[data-testid="stSidebar"] .stMarkdown,
-[data-testid="stSidebar"] .stText {
-    color: #bdc3c7 !important;
-}
-
-/* Button styling adjustments */
-.stButton button,
-.stDownloadButton button {
-    background: linear-gradient(90deg, #1d2a3a 0%, #00b4db 100%) !important;
-    border: none !important;
-    border-radius: 6px !important;
-    font-weight: 600 !important;
-    font-size: 1rem !important;
-    color: white !important;
-}
-
-.stButton button:hover,
-.stDownloadButton button:hover {
-    background: linear-gradient(90deg, #1d2a3a 0%, #0099cc 100%) !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 4px 12px rgba(0, 180, 219, 0.3) !important;
-}
-
-/* Custom scrollbar for sidebar */
-[data-testid="stSidebar"]::-webkit-scrollbar {
-    width: 6px !important;
-}
-
-[data-testid="stSidebar"]::-webkit-scrollbar-track {
-    background: #1d2a3a !important;
-}
-
-[data-testid="stSidebar"]::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #00b4db 0%, #1d2a3a 100%) !important;
-    border-radius: 3px !important;
-}
-
-/* Main content headers */
+/* Main content headers - UNCHANGED */
 .main h1,
 .main h2,
 .main h3 {
-    color: #2c3e50 !important;
-    font-weight: 600 !important;
+    color: #FF5e38;
+    font-weight: 600;
 }
 
-/* Metric cards styling */
+/* Metric cards styling - white background and black text */
 [data-testid="metric-container"],
 [data-testid="stMetric"] {
-    background-color: #f8f9fa !important;
-    padding: 1.5rem !important;
-    border-radius: 0.75rem !important;
-    border-left: 5px solid #3498db !important;
-    margin-bottom: 1rem !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+    background-color: white;
+    color: black;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    border-left: 5px solid #3498db;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    font-size: 1.2rem; /* Increased font size */
+    line-height: 1.6; /* Better readability */
 }
 
 /* Dataframe styling */
 [data-testid="stDataFrame"],
 .dataframe {
-    border-radius: 0.5rem !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+    background-color: black;
+    color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    font-size: 1.1rem; /* Increased font size */
 }
 
-/* Animation for smooth transitions */
-.css-1r6slb0,
-.stCard,
-.tab-button,
-.stButton button {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+/* Ensure text in dataframes is white */
+[data-testid="stDataFrame"] * {
+    color: white;
 }
 
-/* Additional spacing */
-.mb-4 {
-    margin-bottom: 2rem !important;
+.dataframe * {
+    color: white;
 }
 
-/* Plotly modebar styling */
-.js-plotly-plot .plotly .modebar {
-    border-radius: 0 0 8px 8px !important;
+/* Custom classes for Streamlit markdown */
+.main-header {
+    font-size: 2.5rem;
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-weight: 700;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.stHeader a {
+    display: none;
+}
+
+.metric-card {
+    background-color: black;
+    color: white;
+    padding: 1.5rem;
+    border: 1px solid  #3498db;
+    border-radius: 0.75rem;
+    border-left: 5px solid #3498db;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    font-size: 1.2rem; /* Increased font size */
+    line-height: 1.7; /* Better readability */
+}
+
+/* Graph container styling - UNCHANGED (plot text remains as is) */
+[data-testid="stPlotlyChart"],
+.element-container .stPlotlyChart {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Text color in all main content */
+.main * {
+    color: white;
+}
+
+/* Increase font size for regular text content */
+.stMarkdown {
+    font-size: 1.2rem; /* Increased from default */
+    line-height: 1.6; /* Better readability */
+}
+
+/* Increase font size for specific Streamlit text elements */
+.stText, .stAlert, .stWarning, .stInfo, .stSuccess, .stError {
+    font-size: 1.2rem;
+    line-height: 1.6;
+}
+
+/* Card content styling */
+.css-1r6slb0 > div:not(header),
+.stCard > div:not(header) {
+    background-color: black;
+    color: white;
+    border-radius: 0 0 12px 12px;
+    padding: 1rem;
+    font-size: 1.2rem; /* Increased font size */
+}
+
+/* Increase font size for sidebar content */
+[data-testid="stSidebar"] .stMarkdown {
+    font-size: 1.2rem;
+    line-height: 1.6;
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
     [data-testid="stSidebar"] {
-        border-right: none !important;
-        border-bottom: 1px solid #34495e !important;
-    }
-    
-    .css-1r6slb0 > header,
-    .stCard > header {
-        padding: 0.75rem 1rem !important;
-    }
-    
-    .tab-button {
-        font-size: 1rem !important;
-        padding: 12px 16px !important;
+        border-right: none;
+        border-bottom: 1px solid #34495e;
     }
     
     .main .block-container {
-        margin: 10px !important;
-        padding: 15px !important;
+        margin: 10px;
+        padding: 15px;
     }
-}
-
-/* Custom classes for Streamlit markdown */
-.main-header {
-    font-size: 1.2rem !important;
-    color: #2c3e50 !important;
-    text-align: center !important;
-    margin-bottom: 2rem !important;
-    font-weight: 700 !important;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.1) !important;
-}
-
-.metric-card {
-    background-color: #f8f9fa !important;
-    padding: 1.5rem !important;
-    border-radius: 0.75rem !important;
-    border-left: 5px solid #3498db !important;
-    margin-bottom: 1rem !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+    
+    .stButton button {
+        font-size: 1.2rem !important; /* Slightly smaller but still bold on mobile */
+        padding: 12px 16px;
+        font-weight: 800 !important; /* Keep bold on mobile */
+    }
+    
+    /* Slightly smaller text on mobile for better fit */
+    .stMarkdown, .metric-card, [data-testid="metric-container"] {
+        font-size: 1.1rem;
+    }
 }
