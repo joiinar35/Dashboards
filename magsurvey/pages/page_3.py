@@ -11,10 +11,11 @@ def render_reduction_to_pole():
                 unsafe_allow_html=True)
     
     st.markdown("""
-    <h4 style="text-align: justify">This tab shows the magnetic data after applying an <font color="#FF5e38;"> improved reduction to the pole transformation</font>. 
+    <div class="metric-card" style="font-size: 1.3rem;" "text-align: justify">  
+    This tab shows the magnetic data after applying an <font color="#FF5e38;"> improved reduction to the pole transformation</font>. 
     The enhanced algorithm includes better stabilization and filtering to produce more realistic magnetic field values.
     This technique maintains the regional magnetic field while transforming anomalies, resulting in more physically 
-    accurate results.</h4>""", unsafe_allow_html=True)
+    accurate results.</div> """, unsafe_allow_html=True)
     
     # Use the pre-calculated grid data
     xi = survey_xi
