@@ -64,20 +64,20 @@ def load_css():
         """, unsafe_allow_html=True)
 
 
-    st.markdown("""
-    <style>
-        /* Hide the default Streamlit sidebar navigation */
-        [data-testid="stSidebarNav"] {
-            display: none;
-        }
-        
-        /* Hide the default hamburger menu if needed */
-        /* #MainMenu {visibility: hidden;} */
-    </style>
-    """, unsafe_allow_html=True)
-
 # Load CSS
 load_css()
+
+st.markdown("""
+<style>
+    /* Hide the default Streamlit sidebar navigation */
+    [data-testid="stSidebarNav"] {
+        display: none;
+    }
+    
+    /* Hide the default hamburger menu if needed */
+    /* #MainMenu {visibility: hidden;} */
+</style>
+""", unsafe_allow_html=True)
 
 # Initialize session state for navigation
 if 'current_page' not in st.session_state:
