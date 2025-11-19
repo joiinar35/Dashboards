@@ -38,7 +38,8 @@ def load_css():
         with open("assets/style.css", 'r', encoding='utf-8') as f:
             css_content = f.read()
         st.markdown(f"<style>{css_content}</style>", unsafe_allow_html=True)
-        
+
+        # Additional CSS to hide default navigation menu
     except FileNotFoundError:
         # Method 3: Embedded CSS as final fallback
         st.markdown("""
@@ -61,6 +62,19 @@ def load_css():
         [data-testid="stSidebarNav"] { display: none; }
         </style>
         """, unsafe_allow_html=True)
+
+
+    st.markdown("""
+    <style>
+        /* Hide the default Streamlit sidebar navigation */
+        [data-testid="stSidebarNav"] {
+            display: none;
+        }
+        
+        /* Hide the default hamburger menu if needed */
+        /* #MainMenu {visibility: hidden;} */
+    </style>
+    """, unsafe_allow_html=True)
 
 # Load CSS
 load_css()
