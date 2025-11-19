@@ -12,8 +12,8 @@ def render_magnetic_gradients():
     st.markdown("""
     <div class="metric-card" style="font-size: 1.3rem;" "text-align: justify">           
     This tab displays calculated magnetic gradients from the survey data. This technique helps
-    to identify and locate buried sources of magnetization. **Hover over the plots to see detailed 
-    gradient values and measurement locations.**
+    to identify and locate buried sources of magnetization. <b>Hover over the plots to see detailed 
+    gradient values and measurement locations.</b>
     </div> """, unsafe_allow_html=True)
     
     # Extract coordinates and values
