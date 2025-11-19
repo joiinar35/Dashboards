@@ -20,12 +20,15 @@ st.set_page_config(
 )
 
 # Load custom CSS
+# Load custom CSS from GitHub
 def load_css():
-    css_url = "https://raw.githubusercontent.com/joiinar35/Dashboards/main/magsurvey/assets/style.css"
-    with open(css_url,'r') as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    # GitHub raw content URL for the CSS file
+    css_url = "https://raw.githubusercontent.com/joiinar35/Dashboards/0a3a53824fbcb070a5f595277328a5fa05a0adf1/magsurvey/assets/style.css"
     
-    # Additional CSS to hide default navigation menu
+    # Method 1: Direct HTML link (preferred)
+    st.markdown(f'<link rel="stylesheet" type="text/css" href="{css_url}">', unsafe_allow_html=True)
+    
+    # Method 2: Additional inline styles
     st.markdown("""
     <style>
         /* Hide the default Streamlit sidebar navigation */
@@ -33,8 +36,11 @@ def load_css():
             display: none;
         }
         
-        /* Hide the default hamburger menu if needed */
-        /* #MainMenu {visibility: hidden;} */
+        /* Ensure main content has proper spacing */
+        .main .block-container {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
     </style>
     """, unsafe_allow_html=True)
 
