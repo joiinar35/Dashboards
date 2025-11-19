@@ -22,27 +22,45 @@ st.set_page_config(
 # Load custom CSS
 # Load custom CSS from GitHub
 def load_css():
-    # GitHub raw content URL for the CSS file
-    css_url = "https://raw.githubusercontent.com/joiinar35/Dashboards/0a3a53824fbcb070a5f595277328a5fa05a0adf1/magsurvey/assets/style.css"
-    
-    # Method 1: Direct HTML link (preferred)
-    st.markdown(f'<link rel="stylesheet" type="text/css" href="{css_url}">', unsafe_allow_html=True)
-    
-    # Method 2: Additional inline styles
-    st.markdown("""
-    <style>
-        /* Hide the default Streamlit sidebar navigation */
-        [data-testid="stSidebarNav"] {
-            display: none;
-        }
+    """Load CSS with proper error handling for Streamlit Cloud"""
+    try:
+        # Method 1: Try absolute path
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        css_path = os.path.join(current_dir, "assets", "style.css")
         
-        /* Ensure main content has proper spacing */
-        .main .block-container {
-            padding-top: 2rem;
-            padding-bottom: 2rem;
+        if os.path.exists(css_path):
+            with open(css_path, 'r', encoding='utf-8') as f:
+                css_content = f.read()
+            st.markdown(f"<style>{css_content}</style>", unsafe_allow_html=True)
+            return
+        
+        # Method 2: Try relative path (for local development)
+        with open("assets/style.css", 'r', encoding='utf-8') as f:
+            css_content = f.read()
+        st.markdown(f"<style>{css_content}</style>", unsafe_allow_html=True)
+        
+    except FileNotFoundError:
+        # Method 3: Embedded CSS as final fallback
+        st.markdown("""
+        <style>
+        /* Embedded CSS fallback */
+        .stApp { background: #000000; }
+        .main .block-container { 
+            background-color: black; 
+            color: white; 
+            padding: 20px;
         }
-    </style>
-    """, unsafe_allow_html=True)
+        [data-testid="stSidebar"] { 
+            background: linear-gradient(135deg, #1d2a3a 0%, #1d2a3a 100%); 
+        }
+        .stButton button {
+            font-weight: 800 !important;
+            font-size: 1.3rem !important;
+        }
+        .main h1, .main h2, .main h3 { color: #FF5e38; }
+        [data-testid="stSidebarNav"] { display: none; }
+        </style>
+        """, unsafe_allow_html=True)
 
 # Load CSS
 load_css()
