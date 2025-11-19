@@ -8,8 +8,8 @@ def render_survey_data():
                 unsafe_allow_html=True)
     st.markdown("""
     <div class="metric-card" style="font-size: 1.3rem;" "text-align: justify">           
-    The datatable present the raw magnetic data from the survey. Additionally, we show a summary of the data collected and 
-    a contour plot of the magnetic intensities measured along the surveyed area. <br>
+    The datatable present the raw magnetic data from a magnetic survey of a given area as a preliminar study to install a geomagnetic station.
+    Additionally, we show a summary of the data collected and a contour plot of the magnetic intensities measured along the surveyed area. <br>
     A suitable place for a magnetic station should encompass very low magnetic gradients, absence of magnetic anomalies and
     cultural magnetic noise (e.g. power lines, trafic, fences, buildings, etc.). All these requirements are difficut
     to accomplish in urban areas, therefore, we surveyed a distant location far away of most antropic noise.
