@@ -22,7 +22,7 @@ st.set_page_config(
 # Load custom CSS
 def load_css():
     css_url = "https://raw.githubusercontent.com/joiinar35/Dashboards/0a3a53824fbcb070a5f595277328a5fa05a0adf1/magsurvey/assets/style.css"
-    with open(css_url) as f:
+    with open(css_url,'r') as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     
     # Additional CSS to hide default navigation menu
