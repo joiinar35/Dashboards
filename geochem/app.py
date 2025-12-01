@@ -118,10 +118,12 @@ def render_page(tab, loaded_pages):
 server = app.server
 
 if __name__ == '__main__':
+  app.run(debug=True)
+#if __name__ == '__main__':
     # Para produccion en Render, usar debug=False
-    debug_mode = os.environ.get('DEBUG', 'False').lower() == 'true'
-    app.run(
-        debug=debug_mode
+#    debug_mode = os.environ.get('DEBUG', 'False').lower() == 'true'
+#    app.run(
+#        debug=debug_mode
         #host='0.0.0.0',
         #port=int(os.environ.get('PORT', 8050))
-    )
+ #   )
