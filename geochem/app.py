@@ -1,16 +1,22 @@
 # Main Python script
-from dash import Dash, html, dcc
+from dash import Dash, html, dcc, Input, Output, State
 import dash_bootstrap_components as dbc
-from dash import Input, Output, callback_context
 import os
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+
+# Dynamically include custom CSS only if it exists
+external_stylesheets = [dbc.themes.BOOTSTRAP]
+css_path = os.path.join("assets", "style.css")
+if os.path.isfile(css_path):
+    external_stylesheets.append(css_path)
 
 # Initialize the Dash app with Bootstrap theme
 app = Dash(
     __name__,
-    external_stylesheets=[
-        dbc.themes.BOOTSTRAP,
-        "assets/style.css"  # Custom CSS
-    ],
+    external_stylesheets=external_stylesheets,
     suppress_callback_exceptions=True
 )
 
@@ -68,39 +74,45 @@ def load_page_module(page_name):
         return pair_matrix_layout, register_pair_matrix_callbacks
     return None, None
 
-# Callback to switch between pages with lazy loading
+# Single callback for page switching and lazy loading
 @app.callback(
     [Output('page-content', 'children'),
      Output('loaded-pages', 'data')],
     [Input('tabs', 'value')],
-    [Dash.dependencies.State('loaded-pages', 'data')]
+    [State('loaded-pages', 'data')]
 )
 def render_page(tab, loaded_pages):
-    # Get current page layout and callback registrar
+    # Display a loading spinner while switching pages
+    loading_spinner = html.Div([
+        html.H3("Loading...", className="text-center"),
+        dbc.Spinner(color="primary")
+    ])
+
+    # Attempt to load the page module
     page_layout, register_callbacks = load_page_module(tab)
-    
+    error = None
+
     # Register callbacks only once for this page
-    if tab not in loaded_pages and register_callbacks:
+    if (tab not in loaded_pages) and register_callbacks:
         try:
             register_callbacks(app)
             loaded_pages.append(tab)
         except Exception as e:
-            print(f"Error registering callbacks for {tab}: {e}")
+            logging.error(f"Error registering callbacks for {tab}: {e}", exc_info=True)
+            error = html.Div([
+                html.H3(f"Could not load page '{tab}'", className="text-center text-danger"),
+                html.Pre(str(e), className="text-danger")
+            ])
     
-    return page_layout, loaded_pages
-
-# Simple home page layout for initial load
-@app.callback(
-    Output('page-content', 'children', allow_duplicate=True),
-    Input('tabs', 'value'),
-    prevent_initial_call=True
-)
-def initial_load(tab):
-    # Return minimal content initially
-    return html.Div([
-        html.H3("Loading...", className="text-center"),
-        dbc.Spinner(color="primary")
-    ])
+    # If there's an error, show it to user
+    if error:
+        return error, loaded_pages
+    # If page_layout exists, show that
+    elif page_layout:
+        return page_layout, loaded_pages
+    # Else, show loading spinner
+    else:
+        return loading_spinner, loaded_pages
 
 # ⚠️ IMPORTANT for Render
 server = app.server
