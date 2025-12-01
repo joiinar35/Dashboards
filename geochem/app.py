@@ -73,7 +73,7 @@ def load_page_module(page_name):
     [Output('page-content', 'children'),
      Output('loaded-pages', 'data')],
     [Input('tabs', 'value')],
-    [dash.dependencies.State('loaded-pages', 'data')]
+    [Dash.dependencies.State('loaded-pages', 'data')]
 )
 def render_page(tab, loaded_pages):
     # Get current page layout and callback registrar
