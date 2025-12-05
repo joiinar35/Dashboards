@@ -77,8 +77,8 @@ data_viz_layout = dbc.Container([
                 style={"margin-bottom": "1rem"}
             ),
             
-            # DISCLAIMER BOX
-            dbc.Card([
+        # DISCLAIMER BOX
+        dbc.Card([
     dbc.CardHeader("Data Source", className="text-center fw-bold"),
     dbc.CardBody([
         html.P("The data used in this dashboard comes from the 'Inventario Minero del Uruguay', which is freely available in the DINAMIGE catalog hosted on the GeoNetwork of MIEM",
@@ -90,7 +90,7 @@ data_viz_layout = dbc.Container([
             className="text-decoration-none small"  # Añade 'small' aquí también
         )
     ], className="small")  # O aplica a todo el CardBody
-], className="mt-3 border-info", style={"border-width": "2px"})
+], className="mt-3 border-info", style={"border-width": "2px"}),
             
             html.Hr(),
             html.Div(id='controls')
