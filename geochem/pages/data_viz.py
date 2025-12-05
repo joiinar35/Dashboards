@@ -79,17 +79,18 @@ data_viz_layout = dbc.Container([
             
             # DISCLAIMER BOX
             dbc.Card([
-                dbc.CardHeader("Data Source", className="text-center fw-bold"),
-                dbc.CardBody([
-                    html.P("The data used in this dashboard comes from the 'Mining Inventory of Uruguay', which is freely available in the DINAMIGE catalog hosted on the GeoNetwork of the Ministry of Industry, Energy and Mining (MIEM)"),
-                    html.A(
-                        "(https://geonetwork.miem.gub.uy/)",
-                        href="https://geonetwork.miem.gub.uy/",
-                        target="_blank",
-                        className="text-decoration-none"
-                    )
-                ])
-            ], className="mt-3 border-info", style={"border-width": "2px"}),
+    dbc.CardHeader("Data Source", className="text-center fw-bold"),
+    dbc.CardBody([
+        html.P("The data used in this dashboard comes from the 'Inventario Minero del Uruguay', which is freely available in the DINAMIGE catalog hosted on the GeoNetwork of MIEM",
+               className="small mb-1"),  # Añade 'small' aquí
+        html.A(
+            "(https://geonetwork.miem.gub.uy/)",
+            href="https://geonetwork.miem.gub.uy/",
+            target="_blank",
+            className="text-decoration-none small"  # Añade 'small' aquí también
+        )
+    ], className="small")  # O aplica a todo el CardBody
+], className="mt-3 border-info", style={"border-width": "2px"})
             
             html.Hr(),
             html.Div(id='controls')
@@ -348,7 +349,7 @@ def data_viz_callbacks(app):
         )
         return fig
 
-# Nueva funci�n para lazy loading (compatible con app.py optimizado)
+# Nueva función para lazy loading (compatible con app.py optimizado)
 def register_data_viz_callbacks(app):
     """Register callbacks for lazy loading support."""
     return data_viz_callbacks(app)
