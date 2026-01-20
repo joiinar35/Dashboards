@@ -1,1 +1,176 @@
+/* Custom CSS for Geochemical Dashboard */
 
+/* Main container */
+.main {
+    padding: 2rem;
+}
+
+/* Header Container */
+.header-container {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+/* Header Styles */
+.header {
+    background: linear-gradient(115deg, #1d2a3a, #117aca);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-height: 120px;
+    position: relative;
+}
+
+.header h1 {
+    color: white;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    margin: 0;
+    padding: 10px 0;
+}
+
+/* Banner Container */
+.banner-container {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    text-align: right;
+    z-index: 1;
+}
+
+/* Sidebar Styles */
+/* Increase font size for ALL sidebar navigation buttons */
+section[data-testid="stSidebar"] label {
+    font-size: 18px !important;  /* Increased from default 16px */
+    font-weight: 500 !important;
+}
+
+/* Make sidebar banner image full width at bottom in ALL pages */
+section[data-testid="stSidebar"] .stImage {
+    margin-top: auto !important;
+    padding-top: 20px !important;
+    width: 100% !important;
+}
+
+section[data-testid="stSidebar"] img {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+/* Banner Image */
+.banner-image {
+    width: 30%; /* Reduce to 30% of original size */
+    height: auto;
+    max-width: 300px; /* Optional: Set a maximum width */
+    opacity: 0.9; /* Optional: Slight transparency */
+    transition: opacity 0.3s ease;
+}
+
+.banner-image:hover {
+    opacity: 1; /* Full opacity on hover */
+}
+
+/* Alternative if you want the image to sit in the bottom right corner of the header */
+.header::after {
+    content: '';
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 30%;
+    max-width: 300px;
+    height: auto;
+    background-image: url('banner_slim.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: right bottom;
+    opacity: 0.9;
+    pointer-events: none; /* Makes it non-interactive */
+}
+
+/* Sidebar Styles - Simple gradient */
+section[data-testid="stSidebar"] > div {
+    background: linear-gradient(115deg, #1d2a3a, #117aca) !important;
+}
+
+/* Make sidebar text white */
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3,
+section[data-testid="stSidebar"] h4,
+section[data-testid="stSidebar"] h5,
+section[data-testid="stSidebar"] h6,
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] div {
+    color: white !important;
+}
+
+/* Graph Container Styles */
+.graph-container {
+    background: transparent;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+}
+
+/* Explanation Text */
+.explanation-text {
+    background: linear-gradient(115deg, #1d2a3a, #2bbdb3) !important;
+    border-left: 4px solid #0052CC !important;
+    padding: 15px !important;
+    border-radius: 0 5px 5px 0 !important;
+    margin-bottom: 20px !important;
+    color: white !important;
+}
+
+/* Button Styles */
+.stButton>button {
+    background: linear-gradient(135deg, #0052CC 0%, #0066FF 100%);
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.stButton>button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 82, 204, 0.3);
+}
+
+/* Card Styles */
+.card {
+    background: transparent;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+}
+
+/* Warning text */
+.warning-text {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 5px;
+    padding: 10px;
+    margin-top: 10px;
+    font-size: 24px;
+    color: #856404;
+}
+
+/* Responsive banner for smaller screens */
+@media (max-width: 768px) {
+    .banner-image {
+        width: 50%; /* Larger percentage on smaller screens */
+        max-width: 200px;
+    }
+    
+    .header::after {
+        width: 50%;
+        max-width: 200px;
+    }
+}
