@@ -33,7 +33,28 @@ def load_css():
         with open("css/style.css", 'r', encoding='utf-8') as f:
             css_content = f.read()
         st.markdown(f"<style>{css_content}</style>", unsafe_allow_html=True)
-
+    except FileNotFoundError:
+        # Method 3: Embedded CSS as final fallback
+        st.markdown("""
+        <style>
+        /* Embedded CSS fallback */
+        .stApp { background: #000000; }
+        .main .block-container { 
+            background-color: black; 
+            color: white; 
+            padding: 20px;
+        }
+        [data-testid="stSidebar"] { 
+            background: linear-gradient(135deg, #1d2a3a 0%, #1d2a3a 100%); 
+        }
+        .stButton button {
+            font-weight: 800 !important;
+            font-size: 1.3rem !important;
+        }
+        .main h1, .main h2, .main h3 { color: #FF5e38; }
+        [data-testid="stSidebarNav"] { display: none; }
+        </style>
+        """, unsafe_allow_html=True)
 # css_path = 'https://raw.githubusercontent.com/joiinar35/Dashboards/main/geochem_st/css/style.css'
 # with open(css_path, "r") as f:
 #    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
