@@ -23,7 +23,7 @@ def load_and_preprocess_data(file_path):
         else:
             gdf = df
     except FileNotFoundError:
-        st.error(f"Error: {file_path} not found.")
+        st.error(f"Error: {url} not found.")
         df = pd.DataFrame()
         gdf = pd.DataFrame()
     
