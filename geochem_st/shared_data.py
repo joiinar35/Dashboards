@@ -14,8 +14,7 @@ from sklearn.preprocessing import StandardScaler
 def load_and_preprocess_data(file_path):
     """Load and preprocess data for the dashboard."""
     
-    url = ("https://raw.githubusercontent.com/joiinar35/Dashboards/main/geochem_
-    st/data/geochem_clean.csv")
+    url = "https://raw.githubusercontent.com/joiinar35/Dashboards/main/geochem_st/data/geochem_clean.csv"
     try:
         df = pd.read_csv(url)
         if 'x_utm' in df.columns and 'y_utm' in df.columns:
