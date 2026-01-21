@@ -30,7 +30,7 @@ def load_css():
             return
         
         # Method 2: Try relative path (for local development)
-        with open("assets/style.css", 'r', encoding='utf-8') as f:
+        with open("css/style.css", 'r', encoding='utf-8') as f:
             css_content = f.read()
         st.markdown(f"<style>{css_content}</style>", unsafe_allow_html=True)
 
