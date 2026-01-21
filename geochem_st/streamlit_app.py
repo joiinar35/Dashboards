@@ -3,6 +3,8 @@ Main Streamlit application - Entry point
 """
 import streamlit as st
 from PIL import Image
+import os
+import sys
 
 # Page configuration
 st.set_page_config(
@@ -14,9 +16,27 @@ st.set_page_config(
 
 # Load custom CSS - MOVE THIS OUTSIDE main() so it runs on all pages
 
-css_path = 'https://raw.githubusercontent.com/joiinar35/Dashboards/main/geochem_st/css/style.css'
-with open(css_path, "r") as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+def load_css():
+    """Load CSS with proper error handling for Streamlit Cloud"""
+    try:
+        # Method 1: Try absolute path
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        css_path = os.path.join(current_dir, "css", "style.css")
+        
+        if os.path.exists(css_path):
+            with open(css_path, 'r', encoding='utf-8') as f:
+                css_content = f.read()
+            st.markdown(f"<style>{css_content}</style>", unsafe_allow_html=True)
+            return
+        
+        # Method 2: Try relative path (for local development)
+        with open("assets/style.css", 'r', encoding='utf-8') as f:
+            css_content = f.read()
+        st.markdown(f"<style>{css_content}</style>", unsafe_allow_html=True)
+
+# css_path = 'https://raw.githubusercontent.com/joiinar35/Dashboards/main/geochem_st/css/style.css'
+# with open(css_path, "r") as f:
+#    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # Main app
 def main():
