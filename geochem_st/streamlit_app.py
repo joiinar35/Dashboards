@@ -13,6 +13,8 @@ st.set_page_config(
 )
 
 # Load custom CSS - MOVE THIS OUTSIDE main() so it runs on all pages
+
+css_path = 'https://raw.githubusercontent.com/joiinar35/Dashboards/main/geochem_st/css/style.css'
 with open("css/style.css", "r") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
