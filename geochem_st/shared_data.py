@@ -8,7 +8,7 @@ import geopandas as gpd
 from sklearn.preprocessing import StandardScaler
 
 @st.cache_data
-def load_and_preprocess_data(file_path='./data/geochem_clean.csv'):
+def load_and_preprocess_data(file_path='data/geochem_clean.csv'):
     """Load and preprocess data for the dashboard."""
     try:
         df = pd.read_csv(file_path)
