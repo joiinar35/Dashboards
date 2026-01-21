@@ -14,16 +14,16 @@ from sklearn.preprocessing import StandardScaler
 def load_and_preprocess_data(file_path):
     """Load and preprocess data for the dashboard."""
     
-    url = "https://raw.githubusercontent.com/joiinar35/Dashboards/main/geochem_st/data/geochem_clean.csv"
+    file_path = "https://raw.githubusercontent.com/joiinar35/Dashboards/main/geochem_st/data/geochem_clean.csv"
     try:
-        df = pd.read_csv(url)
+        df = pd.read_csv(file_path)
         if 'x_utm' in df.columns and 'y_utm' in df.columns:
             gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.x_utm, df.y_utm))
             gdf = gdf.set_crs("EPSG:32721")
         else:
             gdf = df
     except FileNotFoundError:
-        st.error(f"Error: {url} not found.")
+        st.error(f"Error: {file_path} not found.")
         df = pd.DataFrame()
         gdf = pd.DataFrame()
     
