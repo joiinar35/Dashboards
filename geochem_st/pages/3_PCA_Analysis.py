@@ -27,8 +27,8 @@ df, gdf = load_and_preprocess_data()
 data_for_analysis, scaled_data_df, numeric_cols = prepare_analysis_data(df)
 
 # Load the shared CSS file FIRST
-with open("css/style.css", "r") as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+#with open("css/style.css", "r") as f:
+#    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # Page content
 st.markdown("""
