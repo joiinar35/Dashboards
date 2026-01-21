@@ -20,12 +20,15 @@ from shared_data import (
     column_title_map
 )
 
+# Load the shared CSS file FIRST
+with open("./css/style.css", "r") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # Load data
 df, gdf = load_and_preprocess_data()
 data_for_analysis, scaled_data_df, numeric_cols = prepare_analysis_data(df)
 st.markdown("""
-            <h1 class="header"> Factor Analysis </h1>
+            <h1> Factor Analysis </h1>
             """
             , unsafe_allow_html=True)
 

@@ -14,9 +14,14 @@ from shared_data import (
 )
 
 st.markdown("""
-            <h1 class="header"> Data Visualization </h1>
+            <h1> Data Visualization </h1>
             """
             , unsafe_allow_html=True)
+
+# Load the shared CSS file FIRST
+with open("./css/style.css", "r") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    
 
 # Page content
 st.markdown("""
@@ -56,9 +61,7 @@ st.markdown("""
 col1, col2 = st.columns([2, 8])
 
 with col1:
-    st.markdown("""
-    <div style="background-color: #161b22; padding: 15px; border-radius: 8px; border: 1px solid #30363d;">
-    """, unsafe_allow_html=True)
+
     
     st.subheader("🔬 Element Selection")
     

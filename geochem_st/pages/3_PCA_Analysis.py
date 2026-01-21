@@ -17,7 +17,7 @@ from shared_data import (
 )
 
 st.markdown("""
-            <h1 class="header"> PCA Analysis </h1>
+            <h1> PCA Analysis </h1>
             """
             , unsafe_allow_html=True)
 
@@ -25,6 +25,10 @@ st.markdown("""
 # Load data
 df, gdf = load_and_preprocess_data()
 data_for_analysis, scaled_data_df, numeric_cols = prepare_analysis_data(df)
+
+# Load the shared CSS file FIRST
+with open("./css/style.css", "r") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # Page content
 st.markdown("""

@@ -15,9 +15,13 @@ from shared_data import (
 )
 
 st.markdown("""
-            <h1 class="header"> Pair Matrix </h1>
+            <h1> Pair Matrix </h1>
             """
             , unsafe_allow_html=True)
+
+# Load the shared CSS file FIRST
+with open("./css/style.css", "r") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 
 # Page content
