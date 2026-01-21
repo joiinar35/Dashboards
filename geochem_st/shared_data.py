@@ -9,14 +9,15 @@ from sklearn.preprocessing import StandardScaler
 
 @st.cache_data
 
- 
-file_path = "https://raw.githubusercontent.com/joiinar35/Dashboards/main/geochem_st/data/geochem_clean.csv"
+
 #file_path = 'data/geochem_clean.csv'
 def load_and_preprocess_data(file_path):
     """Load and preprocess data for the dashboard."""
-   
+    
+    url = ("https://raw.githubusercontent.com/joiinar35/Dashboards/main/geochem_
+    st/data/geochem_clean.csv")
     try:
-        df = pd.read_csv(file_path)
+        df = pd.read_csv(url)
         if 'x_utm' in df.columns and 'y_utm' in df.columns:
             gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.x_utm, df.y_utm))
             gdf = gdf.set_crs("EPSG:32721")
