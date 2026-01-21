@@ -12,15 +12,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Load custom CSS
-def load_css():
-    with open("css/style.css", "r") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+# Load custom CSS - MOVE THIS OUTSIDE main() so it runs on all pages
+with open("./css/style.css", "r") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # Main app
 def main():
-    load_css()
-    
     # Header
     st.markdown("""
     <div class="header">
@@ -42,4 +39,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
