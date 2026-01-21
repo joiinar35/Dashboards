@@ -19,7 +19,7 @@ st.markdown("""
             , unsafe_allow_html=True)
 
 # Load the shared CSS file FIRST
-with open("./css/style.css", "r") as f:
+with open("css/style.css", "r") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     
 
