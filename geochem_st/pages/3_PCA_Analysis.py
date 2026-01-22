@@ -15,6 +15,26 @@ from shared_data import (
     prepare_analysis_data, 
     column_title_map
 )
+from pathlib import Path
+
+def find_css(filename="css/style.css", max_levels=6):
+    base = Path(__file__).resolve()
+    for _ in range(max_levels):
+        candidate = base.parent / filename if base.is_file() else base / filename
+        if candidate.exists():
+            return candidate
+        base = base.parent
+    return None
+
+css_file = find_css()
+if css_file:
+    try:
+        with open(css_file, "r", encoding="utf-8") as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    except Exception as e:
+        st.warning(f"Could not load CSS from {css_file}: {e}")
+else:
+    st.warning("Could not find css/style.css — verify the file exists in the repository (search will look upward from this page).")
 
 st.markdown("""
             <h1> PCA Analysis </h1>
