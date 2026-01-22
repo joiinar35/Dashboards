@@ -60,7 +60,7 @@ st.markdown("""
 
 
 st.markdown("""
-<div class="explanation-text">
+<div class="explanation-text" style="font-size: 1.3rem; text-align: justify;">
 <p>This tab provides interactive visualizations of the geochemical data from a given geographical location and sample set.</p>
 <p>Select an element to explore its distribution and correlations.</p>
 <ul>
