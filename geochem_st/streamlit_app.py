@@ -6,28 +6,6 @@ from PIL import Image
 import os
 import sys
 
-# Load css sheet
-st.markdown("""
-<style>
-/* Embedded CSS fallback */
-.stApp { background: #000000; }
-.main .block-container { 
-    background-color: black; 
-    color: white; 
-    padding: 20px;
-}
-[data-testid="stSidebar"] { 
-    background: linear-gradient(135deg, #1d2a3a 0%, #1d2a3a 100%); 
-}
-.stButton button {
-    font-weight: 800 !important;
-    font-size: 1.3rem !important;
-}
-.main h1, .main h2, .main h3 { color: #FF5e38; }
-[data-testid="stSidebarNav"] { display: none; }
-</style>
-""", unsafe_allow_html=True)
-
 # Page configuration
 st.set_page_config(
     page_title="Interactive Geochemical Data Dashboard",
@@ -78,6 +56,28 @@ def main():
             st.image("banner_slim.png", use_container_width=True)
         except:
             st.write("Banner image not found")
-
+            
+        # Load css sheet
+        st.markdown("""
+        <style>
+        /* Embedded CSS fallback */
+        .stApp { background: #000000; }
+        .main .block-container { 
+            background-color: black; 
+            color: white; 
+            padding: 20px;
+        }
+        [data-testid="stSidebar"] { 
+            background: linear-gradient(135deg, #1d2a3a 0%, #1d2a3a 100%); 
+        }
+        .stButton button {
+            font-weight: 800 !important;
+            font-size: 1.3rem !important;
+        }
+        .main h1, .main h2, .main h3 { color: #FF5e38; }
+        [data-testid="stSidebarNav"] { display: none; }
+        </style>
+        """, unsafe_allow_html=True)
+        
 if __name__ == "__main__":
     main()
