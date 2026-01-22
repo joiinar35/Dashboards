@@ -27,9 +27,6 @@ st.markdown("""
 [data-testid="stSidebarNav"] { display: none; }
 </style>
 """, unsafe_allow_html=True)
-# css_path = 'https://raw.githubusercontent.com/joiinar35/Dashboards/main/geochem_st/css/style.css'
-# with open(css_path, "r") as f:
-#    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # Page configuration
 st.set_page_config(
