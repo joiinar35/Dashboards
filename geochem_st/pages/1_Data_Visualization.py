@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
 from scipy.interpolate import griddata
+from pathlib import Path
 
 from shared_data import (
     df,
@@ -13,18 +14,30 @@ from shared_data import (
     element_columns
 )
 
-# Load the shared CSS file FIRST so any HTML using CSS classes gets styled correctly
-css_path = "css/style.css"
-try:
-    with open(css_path, "r") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-except Exception as e:
-    st.warning(f"Could not load CSS from {css_path}: {e}")
+def find_css(filename="css/style.css", max_levels=6):
+    """
+    Search upward from this file for the css file. Returns a Path or None.
+    """
+    base = Path(__file__).resolve()
+    for _ in range(max_levels):
+        candidate = base.parent / filename if base.is_file() else base / filename
+        if candidate.exists():
+            return candidate
+        base = base.parent
+    return None
 
-st.markdown("""
-            <h1> Data Visualization </h1>
-            """
-            , unsafe_allow_html=True)
+# Load the shared CSS file FIRST so any HTML using CSS classes gets styled correctly
+css_file = find_css()
+if css_file:
+    try:
+        with open(css_file, "r", encoding="utf-8") as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    except Exception as e:
+        st.warning(f"Could not load CSS from {css_file}: {e}")
+else:
+    st.warning("Could not find css/style.css — verify the file exists in the repository (search will look upward from this page).")
+
+st.markdown("<h1> Data Visualization </h1>", unsafe_allow_html=True)
 
 st.markdown("""
             <style>
