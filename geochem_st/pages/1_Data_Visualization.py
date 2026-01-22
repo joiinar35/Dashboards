@@ -13,17 +13,19 @@ from shared_data import (
     element_columns
 )
 
+# Load the shared CSS file FIRST so any HTML using CSS classes gets styled correctly
+css_path = "css/style.css"
+try:
+    with open(css_path, "r") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+except Exception as e:
+    st.warning(f"Could not load CSS from {css_path}: {e}")
+
 st.markdown("""
             <h1> Data Visualization </h1>
             """
             , unsafe_allow_html=True)
 
-# Load the shared CSS file FIRST
-#with open("css/style.css", "r") as f:
-#    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-    
-
-# Page content
 st.markdown("""
             <style>
     section[data-testid="stSidebar"] > div {
@@ -45,7 +47,7 @@ st.markdown("""
 
 
 st.markdown("""
-<div class="explanation-text" style="font-size: 1.3rem; text-align: justify;">
+<div class="explanation-text">
 <p>This tab provides interactive visualizations of the geochemical data from a given geographical location and sample set.</p>
 <p>Select an element to explore its distribution and correlations.</p>
 <ul>
