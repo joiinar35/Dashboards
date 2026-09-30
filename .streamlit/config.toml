@@ -1,0 +1,25 @@
+[server]
+runOnSave = false
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+base = "dark"
+primaryColor = "#FF5E38"
+backgroundColor = "#16212D"
+secondaryBackgroundColor = "#1F2D3D"
+textColor = "#E4EAF1"
+linkColor = "#3FE0EE"
+borderColor = "#2B3D52"
+font = "Lato:https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap, sans-serif"
+headingFont = "Lato:https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap, sans-serif"
+headingFontWeights = [900, 700, 700]
+baseRadius = "6px"
+showWidgetBorder = true
+chartCategoricalColors = ["#FF5E38", "#3FE0EE", "#F5B041", "#9B8CF2", "#6FD08C"]
+
+[theme.sidebar]
+backgroundColor = "#1D2A3A"
+secondaryBackgroundColor = "#26374B"
+borderColor = "#2B3D52"
