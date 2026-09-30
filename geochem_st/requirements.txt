@@ -1,0 +1,7 @@
+streamlit>=1.50
+pandas>=2.2
+numpy>=1.26
+scipy>=1.11
+scikit-learn>=1.4
+factor-analyzer>=0.5.1
+plotly>=5.24
