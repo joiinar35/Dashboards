@@ -1,0 +1,68 @@
+# Keeps Streamlit Community Cloud apps awake.
+# Community Cloud puts an app to sleep after 12 hours without visitors. This workflow opens
+# each app in a real (headless) browser every 6 hours, which counts as a visit, and presses
+# "Yes, get this app back up!" if an app has already fallen asleep.
+#
+# Place this file in the repository at: .github/workflows/keep_streamlit_awake.yml
+# Edit the APPS list below with your apps' addresses.
+
+name: Keep Streamlit apps awake
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"   # every 6 hours (UTC); the odd minute avoids GitHub's busiest slots
+  workflow_dispatch:          # adds a "Run workflow" button to test it by hand
+
+jobs:
+  wake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      APPS: |
+        https://YOUR-GEOCHEM-APP.streamlit.app
+        https://YOUR-MAGSURVEY-APP.streamlit.app
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install headless browser
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Visit apps and wake the sleeping ones
+        shell: python
+        run: |
+          import os, re, sys, time
+          from playwright.sync_api import sync_playwright
+
+          apps = [u.strip() for u in os.environ["APPS"].splitlines() if u.strip()]
+          wake = re.compile(r"get this app back up", re.I)
+          failed = []
+
+          with sync_playwright() as p:
+              browser = p.chromium.launch()
+              for url in apps:
+                  page = browser.new_page()
+                  try:
+                      page.goto(url, wait_until="domcontentloaded", timeout=60_000)
+                      time.sleep(8)
+                      woke = False
+                      for frame in page.frames:  # the button may sit inside an iframe
+                          button = frame.get_by_role("button", name=wake)
+                          if button.count():
+                              button.first.click()
+                              woke = True
+                              break
+                      # Stay long enough for the app to start and open a live session.
+                      time.sleep(90 if woke else 30)
+                      print(f"{'WOKEN ' if woke else 'AWAKE '} {url}")
+                  except Exception as exc:
+                      print(f"ERROR  {url}: {exc}")
+                      failed.append(url)
+                  finally:
+                      page.close()
+              browser.close()
+
+          sys.exit(1 if failed else 0)
