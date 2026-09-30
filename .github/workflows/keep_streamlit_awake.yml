@@ -19,8 +19,8 @@ jobs:
     timeout-minutes: 15
     env:
       APPS: |
-        https://YOUR-GEOCHEM-APP.streamlit.app
-        https://YOUR-MAGSURVEY-APP.streamlit.app
+        https://dashboards-2r7kditsnww83nbg3grrv5.streamlit.app/
+        https://dashboards-mfzxmsgdxwcp8zpyahtdfr.streamlit.app/
     steps:
       - uses: actions/setup-python@v5
         with:
